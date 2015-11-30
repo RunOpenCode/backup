@@ -1,0 +1,49 @@
+{
+    "name": "runopencode/backup",
+    "description": "Simple web application backup library, fork of 'kbond/php-backup'.",
+    "keywords": [
+        "backup"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nikola Svitlica a.k.a TheCelavi",
+            "email": "thecelavi@gmail.com",
+            "homepage": "http://www.runopencode.com",
+            "role": "Project lead"
+        },
+        {
+            "name": "RunOpenCode members",
+            "email": "support@runopencode.com",
+            "homepage": "http://www.runopencode.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "RunOpenCode\\Backup\\": "src/RunOpenCode/Backup/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RunOpenCode\\Backup\\Tests\\": "test/"
+        }
+    },
+    "require": {
+        "php": ">=5.4",
+        "psr/log": "1.*",
+        "symfony/process": "2.*",
+        "symfony/event-dispatcher": "~2.7.6"
+    },
+    "require-dev": {
+        "league/flysystem": "1.*",
+        "phpunit/phpunit": "~4.8",
+        "symfony/filesystem": "~2.3|~3.0",
+        "symfony/finder": "~2.5|~3.0"
+    },
+    "suggest": {
+        "league/flysystem": "1.*",
+        "symfony/filesystem": "~2.3|~3.0",
+        "symfony/finder": "~2.5|~3.0"
+    }
+}
