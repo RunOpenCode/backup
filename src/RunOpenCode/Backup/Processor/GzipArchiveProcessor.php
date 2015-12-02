@@ -86,7 +86,7 @@ class GzipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareIn
         }
 
         $this->getEventDispatcher()->addListener(BackupEvent::TERMINATE, function() use ($tmpFile) {
-            @unlink($tmpFile);
+            unlink($tmpFile);
         });
 
         return array(File::fromLocal($tmpFile, dirname($tmpFile), $this->filename));

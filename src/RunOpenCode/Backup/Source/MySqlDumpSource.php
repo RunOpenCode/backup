@@ -110,7 +110,7 @@ class MySqlDumpSource implements SourceInterface, LoggerAwareInterface, EventDis
         } else {
 
             $this->getEventDispatcher()->addListener(BackupEvent::TERMINATE, function() use ($tmpFile) {
-                @unlink($tmpFile);
+                unlink($tmpFile);
             });
 
             return array(File::fromLocal($tmpFile, dirname($tmpFile), sprintf('mysql-dump-%s-%s-%s.sql', $this->database, $this->host, date('Y-m-d-H-i-s'))));
