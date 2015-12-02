@@ -14,7 +14,7 @@ namespace RunOpenCode\Backup\Tests\Source;
 
 use Psr\Log\NullLogger;
 use RunOpenCode\Backup\Contract\FileInterface;
-use RunOpenCode\Backup\Source\Glob;
+use RunOpenCode\Backup\Source\GlobSource;
 use RunOpenCode\Backup\Source\SourceCollection;
 
 class SourceCollectionTest extends \PHPUnit_Framework_TestCase
@@ -27,8 +27,8 @@ class SourceCollectionTest extends \PHPUnit_Framework_TestCase
         $source = new SourceCollection();
 
         $source
-            ->add($src1 = new Glob(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
-            ->add($src2 = new Glob(realpath(__DIR__ . '/../Fixtures/glob/globSet2') . '/*'));
+            ->add($src1 = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
+            ->add($src2 = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet2') . '/*'));
 
         $logger = new NullLogger();
 
@@ -63,8 +63,8 @@ class SourceCollectionTest extends \PHPUnit_Framework_TestCase
         chmod($directory, 0200);
 
         $source
-            ->add($src1 = new Glob(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
-            ->add($src2 = new Glob($directory. '/*'));
+            ->add($src1 = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
+            ->add($src2 = new GlobSource($directory. '/*'));
 
         $logger = new NullLogger();
 

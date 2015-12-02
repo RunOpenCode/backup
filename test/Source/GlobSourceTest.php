@@ -12,10 +12,9 @@
  */
 namespace RunOpenCode\Backup\Tests\Source;
 
-
 use Psr\Log\NullLogger;
 use RunOpenCode\Backup\Contract\FileInterface;
-use RunOpenCode\Backup\Source\Glob;
+use RunOpenCode\Backup\Source\GlobSource;
 
 class GlobSourceTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,7 +24,7 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
      */
     public function singleGlob()
     {
-        $source = new Glob(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*');
+        $source = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*');
         $files = $source->fetch();
 
         $this->assertArraySubset(
@@ -52,7 +51,7 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
      */
     public function multipleGlobs()
     {
-        $source = new Glob(array(
+        $source = new GlobSource(array(
             realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*' => realpath(__DIR__ . '/../Fixtures/glob'),
             realpath(__DIR__ . '/../Fixtures/glob/globSet2') . '/*' => realpath(__DIR__ . '/../Fixtures/glob'),
         ));
@@ -89,7 +88,7 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
 
         chmod($directory, 0200);
 
-        $source = new Glob($directory . '/*');
+        $source = new GlobSource($directory . '/*');
         $source->setLogger(new NullLogger());
         $source->fetch();
     }

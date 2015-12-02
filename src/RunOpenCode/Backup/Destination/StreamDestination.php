@@ -12,7 +12,6 @@
  */
 namespace RunOpenCode\Backup\Destination;
 
-use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Backup\Backup;
 use RunOpenCode\Backup\Backup\File;
 use RunOpenCode\Backup\Contract\BackupInterface;

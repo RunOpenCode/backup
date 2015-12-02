@@ -11,6 +11,7 @@
  * view CREDITS file that was distributed with this source code.
  */
 namespace RunOpenCode\Backup\Contract;
+use RunOpenCode\Backup\Exception\SourceException;
 
 /**
  * Interface SourceInterface
@@ -25,6 +26,7 @@ interface SourceInterface
      * Fetch source for backup process.
      *
      * @return FileInterface[] Returns list of backup files for backup.
+     * @throws SourceException
      */
     public function fetch();
 }

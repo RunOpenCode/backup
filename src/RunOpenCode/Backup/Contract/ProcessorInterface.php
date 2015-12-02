@@ -11,6 +11,7 @@
  * view CREDITS file that was distributed with this source code.
  */
 namespace RunOpenCode\Backup\Contract;
+use RunOpenCode\Backup\Exception\ProcessorException;
 
 /**
  * Interface ProcessorInterface
@@ -24,8 +25,9 @@ interface ProcessorInterface
     /**
      * Process backups and preparing them for upload.
      *
-     * @param FileInterface[] $backups Backups to process.
+     * @param FileInterface[] $files Backup files to process.
      * @return FileInterface[]
+     * @throws ProcessorException
      */
-    public function process(array $backups);
+    public function process(array $files);
 }

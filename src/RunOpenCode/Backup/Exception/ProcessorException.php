@@ -11,15 +11,9 @@
  * view CREDITS file that was distributed with this source code.
  */
 
+namespace RunOpenCode\Backup\Exception;
 
-/**
- * In order to test source: \RunOpenCode\Backup\Source\MySqlDumpSource, copy this file in same location under filename
- * "mysqldump.php" and configure it according to your database settings.
- */
-return array(
-    'username' => 'root',
-    'password' => '',
-    'host' => null,
-    'port' => 3306,
-    'database' => 'mysql'
-);
+class ProcessorException extends BackupException
+{
+
+}

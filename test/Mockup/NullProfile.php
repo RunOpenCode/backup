@@ -1,6 +1,6 @@
 <?php
 
-namespace RunOpenCode\Backup\Tests\Source\Mockup;
+namespace RunOpenCode\Backup\Tests\Mockup;
 
 use RunOpenCode\Backup\Contract\ProfileInterface;
 

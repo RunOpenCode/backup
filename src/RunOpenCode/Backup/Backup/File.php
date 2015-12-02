@@ -63,18 +63,10 @@ final class File implements FileInterface
         $this->name = $name;
         $this->path = $path;
         $this->rootPath = rtrim(is_null($rootPath) ? '' : $rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-
-        $pos = strpos($this->path, $this->rootPath);
-
-        if ($pos === 0) {
-            $this->relativePath = substr_replace($this->path, '', $pos, strlen($this->rootPath));
-        } else {
-            $this->relativePath = $this->path;
-        }
-
         $this->size = $size;
         $this->createdAt = \DateTimeImmutable::createFromMutable((is_integer($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt));
         $this->modifiedAt = \DateTimeImmutable::createFromMutable((is_integer($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt));
+        $this->relativePath = null;
     }
 
     /**
@@ -106,6 +98,17 @@ final class File implements FileInterface
      */
     public function getRelativePath()
     {
+        if (is_null($this->relativePath)) {
+
+            $pos = strpos($this->path, $this->rootPath);
+
+            if ($pos === 0) {
+                $this->relativePath = substr_replace($this->path, '', $pos, strlen($this->rootPath));
+            } else {
+                $this->relativePath = $this->path;
+            }
+        }
+
         return $this->relativePath;
     }
 

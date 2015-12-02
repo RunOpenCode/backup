@@ -23,13 +23,13 @@ use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\Process\ProcessBuilder;
 
 /**
- * Class MySqlDump
+ * Class MySqlDumpSource
  *
  * Fetch database dump for backup.
  *
  * @package RunOpenCode\Backup\Source
  */
-class MySqlDump implements SourceInterface, LoggerAwareInterface, EventDispatcherAwareInterface
+class MySqlDumpSource implements SourceInterface, LoggerAwareInterface, EventDispatcherAwareInterface
 {
     use LoggerAwareTrait;
     use EventDispatcherAwareTrait;

@@ -24,14 +24,15 @@ use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\Process\ProcessBuilder;
 
 /**
- * Class ZipArchiveProcessor
+ * Class GzipArchiveProcessor
  *
- * Zip archive processor combines all backup file into single zip compressed archive.
+ * Gzip archive processor combines all backup file into single gz compressed archive.
  *
  * @package RunOpenCode\Backup\Processor
  */
-class ZipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInterface, LoggerAwareInterface
+class GzipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInterface, LoggerAwareInterface
 {
+
     use EventDispatcherAwareTrait;
     use LoggerAwareTrait;
 
@@ -40,9 +41,15 @@ class ZipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInt
      */
     protected $filename;
 
-    public function __construct($filename = 'archive.zip')
+    /**
+     * @var string
+     */
+    protected $flags;
+
+    public function __construct($flags = '-czvf', $filename = 'archive.tar.gz')
     {
         $this->filename = $filename;
+        $this->flags = $flags;
     }
 
     /**
@@ -50,13 +57,17 @@ class ZipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInt
      */
     public function process(array $files)
     {
-        $tmpFile = tempnam(sys_get_temp_dir(), 'zip-archive-processor');
+        $tmpFile = tempnam(sys_get_temp_dir(), 'gzip-archive-processor');
 
         $processBuilder = new ProcessBuilder();
 
-        $processBuilder
-            ->add('zip')
-            ->add($tmpFile);
+        $processBuilder->add('tar');
+
+        if (!is_null($this->flags)) {
+            $processBuilder->add($this->flags);
+        }
+
+        $processBuilder->add($tmpFile);
 
         /**
          * @var FileInterface $backup
@@ -70,7 +81,7 @@ class ZipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInt
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $this->getLogger()->error('Unable to create zip archive.');
+            $this->getLogger()->error('Unable to create gzip archive.');
             throw new ProcessorException();
         }
 

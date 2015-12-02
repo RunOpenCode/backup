@@ -20,13 +20,13 @@ use RunOpenCode\Backup\Exception\SourceException;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
 
 /**
- * Class Glob
+ * Class GlobSource
  *
- * Glob source uses glob expressions to determine which files should be backed up.
+ * GlobSource source uses glob expressions to determine which files should be backed up.
  *
  * @package RunOpenCode\Backup\Source
  */
-class Glob implements SourceInterface, LoggerAwareInterface
+class GlobSource implements SourceInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
@@ -53,7 +53,7 @@ class Glob implements SourceInterface, LoggerAwareInterface
 
             if ($files === false) {
 
-                $this->getLogger()->error(sprintf('Glob expression "%s" is not correct and it fails getting list of files.', $glob), array(
+                $this->getLogger()->error(sprintf('GlobSource expression "%s" is not correct and it fails getting list of files.', $glob), array(
                     'glob' => $glob
                 ));
 

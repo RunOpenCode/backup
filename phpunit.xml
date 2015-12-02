@@ -11,6 +11,11 @@
             <directory suffix="Test.php">./test/Namer</directory>
         </testsuite>
 
+        <testsuite name="Processor tests">
+            <directory suffix="Test.php">./test/Processor</directory>
+        </testsuite>
+
+
     </testsuites>
 
     <filter>

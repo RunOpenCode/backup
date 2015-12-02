@@ -14,8 +14,8 @@ namespace RunOpenCode\Backup\Tests\Source;
 
 use Psr\Log\NullLogger;
 use RunOpenCode\Backup\Event\BackupEvent;
-use RunOpenCode\Backup\Source\MySqlDump;
-use RunOpenCode\Backup\Tests\Source\Mockup\NullProfile;
+use RunOpenCode\Backup\Source\MySqlDumpSource;
+use RunOpenCode\Backup\Tests\Mockup\NullProfile;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
@@ -26,7 +26,7 @@ class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
     public function successfulDumpAndCleanup()
     {
         $settings = require_once __DIR__ .'/../Fixtures/config/mysqldump.php';
-        $source = new MySqlDump($settings['database'], $settings['username'], $settings['password'], $settings['host'], $settings['port']);
+        $source = new MySqlDumpSource($settings['database'], $settings['username'], $settings['password'], $settings['host'], $settings['port']);
 
         $source->setLogger(new NullLogger());
         $source->setEventDispatcher($eventDispatcher = new EventDispatcher());
@@ -50,7 +50,7 @@ class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
     public function connectionError()
     {
         $settings = require_once __DIR__ .'/../Fixtures/config/mysqldump.php';
-        $source = new MySqlDump($settings['database'], $settings['username'], $settings['password'], 'www.non-existing-domain.com', $settings['port']);
+        $source = new MySqlDumpSource($settings['database'], $settings['username'], $settings['password'], 'www.non-existing-domain.com', $settings['port']);
 
         $source->setLogger(new NullLogger());
         $source->setEventDispatcher($eventDispatcher = new EventDispatcher());
@@ -66,7 +66,7 @@ class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
     public function databaseError()
     {
         $settings = require_once __DIR__ .'/../Fixtures/config/mysqldump.php';
-        $source = new MySqlDump('There is no way that you have database with this name.', $settings['username'], $settings['password'], $settings['host'], $settings['port']);
+        $source = new MySqlDumpSource('There is no way that you have database with this name.', $settings['username'], $settings['password'], $settings['host'], $settings['port']);
 
         $source->setLogger(new NullLogger());
         $source->setEventDispatcher($eventDispatcher = new EventDispatcher());
