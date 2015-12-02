@@ -37,7 +37,7 @@ class Glob implements SourceInterface, LoggerAwareInterface
         if (is_array($glob)) {
             $this->globs = $glob;
         } else {
-            $this->globs = array(str_replace('*', '', $glob) => $glob);
+            $this->globs = array($glob => str_replace('*', '', $glob));
         }
     }
 
@@ -48,8 +48,8 @@ class Glob implements SourceInterface, LoggerAwareInterface
     {
         $backupFiles = array();
 
-        foreach ($this->globs as $rootPath => $glob) {
-            $files = @glob($glob);
+        foreach ($this->globs as $glob => $rootPath) {
+            $files = @glob($glob, GLOB_ERR);
 
             if ($files === false) {
 

@@ -43,6 +43,13 @@ interface FileInterface
     public function getRootPath();
 
     /**
+     * Get file relative path having in mind its root path.
+     *
+     * @return mixed
+     */
+    public function getRelativePath();
+
+    /**
      * Get file size.
      *
      * @return int

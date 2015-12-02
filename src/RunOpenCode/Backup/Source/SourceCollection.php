@@ -35,6 +35,8 @@ final class SourceCollection implements SourceInterface, \IteratorAggregate
      */
     public function __construct(array $sources = array())
     {
+        $this->sources = array();
+
         foreach ($sources as $source) {
             $this->add($source);
         }
@@ -44,11 +46,11 @@ final class SourceCollection implements SourceInterface, \IteratorAggregate
      * Add source to collection.
      *
      * @param SourceInterface $source Source to add.
-     * @return SourceInterface $this Fluent interface.
+     * @return SourceCollection $this Fluent interface.
      */
     public function add(SourceInterface $source)
     {
-        $this->sources = $source;
+        $this->sources[] = $source;
         return $this;
     }
 
@@ -58,7 +60,6 @@ final class SourceCollection implements SourceInterface, \IteratorAggregate
     public function fetch()
     {
         $files = array();
-
         /**
          * @var SourceInterface $source
          */

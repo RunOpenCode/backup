@@ -21,7 +21,7 @@ namespace RunOpenCode\Backup\Utils;
  */
 abstract class Filesize
 {
-    private final function __construct() {}
+    final private function __construct() {}
 
     /**
      * Get bytes from formatted string size.
@@ -55,7 +55,8 @@ abstract class Filesize
         );
 
         foreach ($units as $unit => $bytes) {
-            if (($temp = strlen($size) - strlen($unit)) >= 0 && strpos($size, $unit, $temp) !== FALSE) {
+
+            if (($temp = strlen($size) - strlen($unit)) >= 0 && strpos($size, $unit, $temp) !== false) {
 
                 $numberPart = str_replace($unit, '', $size);
 

@@ -54,7 +54,12 @@ class MySqlDump implements SourceInterface, LoggerAwareInterface, EventDispatche
      */
     protected $host;
 
-    public function __construct($database, $user, $password = null, $host = 'localhost')
+    /**
+     * @var int
+     */
+    protected $port;
+
+    public function __construct($database, $user, $password = null, $host = null, $port = 3306)
     {
         $this->database = $database;
         $this->user = $user;
@@ -71,8 +76,11 @@ class MySqlDump implements SourceInterface, LoggerAwareInterface, EventDispatche
 
         $processBuilder
             ->add('mysqldump')
-            ->add(sprintf('-u%s', $this->user))
-            ->add(sprintf('-h%s', $this->host));
+            ->add(sprintf('-u%s', $this->user));
+
+        if (!is_null($this->host)) {
+            $processBuilder->add(sprintf('-h%s:%s', $this->host, $this->port));
+        }
 
         if (null !== $this->password) {
             $processBuilder->add(sprintf('-p%s', $this->password));
@@ -85,7 +93,9 @@ class MySqlDump implements SourceInterface, LoggerAwareInterface, EventDispatche
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $this->getLogger()->error(sprintf('Unable to dump MySql database "%s".', $this->database));
+            $this->getLogger()->error(sprintf('Unable to dump MySql database "%s".', $this->database, array(
+                'process_error_output' => $process->getErrorOutput()
+            )));
             throw new SourceException();
         }
 
@@ -102,7 +112,7 @@ class MySqlDump implements SourceInterface, LoggerAwareInterface, EventDispatche
                 @unlink($tmpFile);
             });
 
-            return File::fromLocal($tmpFile, dirname($tmpFile), sprintf('mysql-dump-%s-%s-%s.sql', $this->database, $this->host, date('Y-m-d-H-i-s')));
+            return array(File::fromLocal($tmpFile, dirname($tmpFile), sprintf('mysql-dump-%s-%s-%s.sql', $this->database, $this->host, date('Y-m-d-H-i-s'))));
         }
     }
 }

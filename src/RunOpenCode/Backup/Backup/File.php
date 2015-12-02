@@ -39,6 +39,11 @@ final class File implements FileInterface
     private $rootPath;
 
     /**
+     * @var string;
+     */
+    private $relativePath;
+
+    /**
      * @var integer
      */
     private $size;
@@ -57,7 +62,16 @@ final class File implements FileInterface
     {
         $this->name = $name;
         $this->path = $path;
-        $this->rootPath = $path;
+        $this->rootPath = rtrim(is_null($rootPath) ? '' : $rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        $pos = strpos($this->path, $this->rootPath);
+
+        if ($pos === 0) {
+            $this->relativePath = substr_replace($this->path, '', $pos, strlen($this->rootPath));
+        } else {
+            $this->relativePath = $this->path;
+        }
+
         $this->size = $size;
         $this->createdAt = \DateTimeImmutable::createFromMutable((is_integer($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt));
         $this->modifiedAt = \DateTimeImmutable::createFromMutable((is_integer($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt));
@@ -79,9 +93,20 @@ final class File implements FileInterface
         return $this->path;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getRootPath()
     {
         return $this->rootPath;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getRelativePath()
+    {
+        return $this->relativePath;
     }
 
     /**
@@ -112,7 +137,7 @@ final class File implements FileInterface
      * Create File instance from local, mounted filesystem.
      *
      * @param string $path Path to file.
-     * @param null|string $rootPath Root path to file.
+     * @param null|string $rootPath Root path of file.
      * @param null|string $name Filename to use instead of original one (if provided).
      * @return File Created backup file instance.
      */
