@@ -87,10 +87,10 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
     {
         $directory = realpath(__DIR__ . '/../Fixtures/glob/globCanNotReadThis');
 
-        @chmod($directory, 0200);
+        chmod($directory, 0200);
 
         $source = new Glob($directory . '/*');
         $source->setLogger(new NullLogger());
-        $files = $source->fetch();
+        $source->fetch();
     }
 }

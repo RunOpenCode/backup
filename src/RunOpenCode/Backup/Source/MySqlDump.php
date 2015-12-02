@@ -65,6 +65,7 @@ class MySqlDump implements SourceInterface, LoggerAwareInterface, EventDispatche
         $this->user = $user;
         $this->password = $password;
         $this->host = $host;
+        $this->port = $port;
     }
 
     /**
