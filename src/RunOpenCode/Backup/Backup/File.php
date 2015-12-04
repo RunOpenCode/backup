@@ -64,8 +64,8 @@ final class File implements FileInterface
         $this->path = $path;
         $this->rootPath = rtrim(is_null($rootPath) ? '' : $rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         $this->size = $size;
-        $this->createdAt = \DateTimeImmutable::createFromMutable((is_integer($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt));
-        $this->modifiedAt = \DateTimeImmutable::createFromMutable((is_integer($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt));
+        $this->createdAt = (is_numeric($createdAt)) ? date_timestamp_set(new \DateTime(), $createdAt) : clone $createdAt;
+        $this->modifiedAt = (is_numeric($modifiedAt)) ? date_timestamp_set(new \DateTime(), $modifiedAt) : clone $modifiedAt;
         $this->relativePath = null;
     }
 
@@ -125,7 +125,7 @@ final class File implements FileInterface
      */
     public function getCreatedAt()
     {
-        return $this->createdAt;
+        return clone $this->createdAt;
     }
 
     /**
@@ -133,7 +133,7 @@ final class File implements FileInterface
      */
     public function getModifiedAt()
     {
-        return $this->modifiedAt;
+        return clone $this->modifiedAt;
     }
 
     /**

@@ -91,7 +91,7 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
         $process->run();
 
         if (!$process->isSuccessful()) {
-            throw new SourceException(sprintf('Unable to dump MySql database "%s", reason: "".', $this->database, $process->getErrorOutput()));
+            throw new SourceException(sprintf('Unable to dump MySql database "%s", reason: "%s".', $this->database, $process->getErrorOutput()));
         }
 
         $tmpFile = tempnam(sys_get_temp_dir(), preg_replace('/[^a-zA-Z0-9-_\.]/','', sprintf('mysql-dump-%s-%s', $this->database, $this->host)));
