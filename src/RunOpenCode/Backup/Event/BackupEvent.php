@@ -26,73 +26,29 @@ use Symfony\Component\EventDispatcher\GenericEvent;
  */
 final class BackupEvent extends GenericEvent
 {
-    /**
-     * Dispatched at the begging of the backup process.
-     */
-    const BEGIN = 'run_open_code.backup.begin';
-
-    /**
-     * Dispatched after Source have provided backup files.
-     */
-    const FETCH = 'run_open_code.backup.fetch';
-
-    /**
-     * Dispatched after Processor have finished with processing.
-     */
-    const PROCESS = 'run_open_code.backup.process';
-
-    /**
-     * Dispatched after Namer have finished with naming of backup.
-     */
-    const NAME = 'run_open_code.backup.name';
-
-    /**
-     * Dispatched after PreRotator have nominated backups for rotation.
-     */
-    const PRE_ROTATE = 'run_open_code.backup.pre_rotate';
-
-    /**
-     * Dispatched after backup is pushed to Destination.
-     */
-    const PUSH = 'run_open_code.backup.push';
-
-    /**
-     * Dispatched after PostRotator have nominated backups for rotation.
-     */
-    const POST_ROTATE = 'run_open_code.backup.post_rotate';
-
-    /**
-     * Dispatched always - when backup process is terminated.
-     */
-    const TERMINATE = 'run_open_code.backup.terminate';
-
-    /**
-     * Dispatched on backup error.
-     */
-    const ERROR = 'run_open_code.backup.error';
-
-    public function __construct(ProfileInterface $profile, BackupInterface $backup = null, WorkflowActivityInterface $activity = null)
+    public function __construct($subject = null, ProfileInterface $profile = null, BackupInterface $backup = null, WorkflowActivityInterface $activity = null)
     {
-        parent::__construct($activity, $arguments = array(
+        parent::__construct($subject, $arguments = array(
             'profile' => $profile,
-            'backup' => $backup
+            'backup' => $backup,
+            'activity' => $activity
         ));
     }
 
     /**
      * Get activity which dispatched the event.
      *
-     * @return null|WorkflowActivityInterface
+     * @return WorkflowActivityInterface|null
      */
     public function getActivity()
     {
-        return $this->getSubject();
+        return $this->getArgument('activity');
     }
 
     /**
      * Get current processing profile.
      *
-     * @return ProfileInterface
+     * @return ProfileInterface|null
      */
     public function getProfile()
     {
@@ -102,7 +58,7 @@ final class BackupEvent extends GenericEvent
     /**
      * Get current processing backup.
      *
-     * @return null|BackupInterface
+     * @return BackupInterface|null
      */
     public function getBackup()
     {

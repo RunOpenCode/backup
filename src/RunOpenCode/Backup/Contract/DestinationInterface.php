@@ -13,6 +13,7 @@
 namespace RunOpenCode\Backup\Contract;
 
 use Psr\Log\LoggerInterface;
+use RunOpenCode\Backup\Exception\DestinationException;
 
 /**
  * Interface DestinationInterface
@@ -27,6 +28,7 @@ interface DestinationInterface extends \IteratorAggregate
      * Push backup to destination.
      *
      * @param BackupInterface $backup
+     * @throws DestinationException
      */
     public function push(BackupInterface $backup);
 
@@ -50,6 +52,7 @@ interface DestinationInterface extends \IteratorAggregate
      * Delete backup.
      *
      * @param $key
+     * @throws DestinationException
      */
     public function delete($key);
 

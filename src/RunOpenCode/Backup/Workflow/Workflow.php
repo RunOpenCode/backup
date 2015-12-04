@@ -19,6 +19,7 @@ use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
 use RunOpenCode\Backup\Contract\WorkflowActivityInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -70,7 +71,7 @@ class Workflow
         $backup = new Backup($this->profile->getName());
 
         $this->logger->info(sprintf('About to execute backup for profile: "%s".', $this->profile->getName()));
-        $this->eventDispatcher->dispatch(BackupEvent::BEGIN, new BackupEvent($this->profile, $backup, null));
+        $this->eventDispatcher->dispatch(BackupEvents::BEGIN, new BackupEvent($this, $this->profile, $backup));
 
         foreach ($this->activities as $activityClass) {
             /**
@@ -96,7 +97,7 @@ class Workflow
 
             } catch (\Exception $e) {
 
-                $this->eventDispatcher->dispatch(BackupEvent::ERROR, new BackupEvent($this->profile, $backup, $activity));
+                $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $this->profile, $backup, $activity));
 
                 throw $e;
             }

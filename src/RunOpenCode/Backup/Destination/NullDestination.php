@@ -18,7 +18,7 @@ use RunOpenCode\Backup\Contract\DestinationInterface;
 /**
  * Class NullDestination
  *
- * Null destination does not contains any backups.
+ * Null destination does not contains or store any backups.
  *
  * @package RunOpenCode\Backup\Destination
  */

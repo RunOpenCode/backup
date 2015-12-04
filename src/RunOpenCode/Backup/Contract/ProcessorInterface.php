@@ -11,6 +11,7 @@
  * view CREDITS file that was distributed with this source code.
  */
 namespace RunOpenCode\Backup\Contract;
+
 use RunOpenCode\Backup\Exception\ProcessorException;
 
 /**

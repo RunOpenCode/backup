@@ -10,16 +10,9 @@
  * This project is fork of "kbond/php-backup", for full credits info, please
  * view CREDITS file that was distributed with this source code.
  */
+namespace RunOpenCode\Backup\Exception;
 
+class DestinationException extends BackupException
+{
 
-/**
- * In order to test source: \RunOpenCode\Backup\Source\MySqlDumpSource, copy this file in same location under filename
- * "mysqldump.php" and configure it according to your database settings.
- */
-return array(
-    'username' => 'root',
-    'password' => null,
-    'host' => null,
-    'port' => 3306,
-    'database' => 'test_database'
-);
+}

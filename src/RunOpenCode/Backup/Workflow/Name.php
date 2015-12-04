@@ -15,6 +15,7 @@ namespace RunOpenCode\Backup\Workflow;
 use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
 use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
 
@@ -37,7 +38,7 @@ class Name extends BaseActivity implements LoggerAwareInterface, EventDispatcher
             $this->backup->setName($this->profile->getNamer()->getName());
 
             $this->getLogger()->info('Naming successfully completed.');
-            $this->getEventDispatcher()->dispatch(BackupEvent::NAME, new BackupEvent($this->profile, $this->backup, $this));
+            $this->getEventDispatcher()->dispatch(BackupEvents::NAME, new BackupEvent($this, $this->profile, $this->backup, $this));
 
 
         } catch (\Exception $e) {

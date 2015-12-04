@@ -15,6 +15,7 @@ namespace RunOpenCode\Backup\Workflow;
 use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
 use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
 
@@ -43,7 +44,7 @@ class Process extends BaseActivity implements LoggerAwareInterface, EventDispatc
             $this->backup->setFiles($files);
 
             $this->getLogger()->info(sprintf('Source files successfully processed, %s files in, %s out.', $countIn, $countOut));
-            $this->getEventDispatcher()->dispatch(BackupEvent::PROCESS, new BackupEvent($this->profile, $this->backup, $this));
+            $this->getEventDispatcher()->dispatch(BackupEvents::PROCESS, new BackupEvent($this, $this->profile, $this->backup, $this));
 
 
         } catch (\Exception $e) {

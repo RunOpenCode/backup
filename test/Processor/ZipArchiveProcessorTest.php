@@ -12,12 +12,11 @@
  */
 namespace RunOpenCode\Backup\Tests\Processor;
 
-use Psr\Log\NullLogger;
 use RunOpenCode\Backup\Contract\FileInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Processor\ZipArchiveProcessor;
 use RunOpenCode\Backup\Source\GlobSource;
-use RunOpenCode\Backup\Tests\Mockup\NullProfile;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class ZipArchiveProcessorTest extends \PHPUnit_Framework_TestCase
@@ -33,7 +32,6 @@ class ZipArchiveProcessorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(3, count($files), 'There are 3 files to archive.');
 
         $processor = new ZipArchiveProcessor('archive.zip');
-        $processor->setLogger(new NullLogger());
         $processor->setEventDispatcher($eventDispatcher = new EventDispatcher());
 
         $processedFiles = $processor->process($files);
@@ -47,7 +45,7 @@ class ZipArchiveProcessorTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(file_exists($processedFile->getPath()), 'Zip archive exists.');
 
-        $eventDispatcher->dispatch(BackupEvent::TERMINATE, new BackupEvent(new NullProfile()));
+        $eventDispatcher->dispatch(BackupEvents::TERMINATE, new BackupEvent());
 
         $this->assertFalse(file_exists($processedFile->getPath()), 'Zip archive is cleaned up.');
     }
@@ -60,7 +58,6 @@ class ZipArchiveProcessorTest extends \PHPUnit_Framework_TestCase
     public function couldNotProcessEmptyCollection()
     {
         $processor = new ZipArchiveProcessor('archive.zip');
-        $processor->setLogger(new NullLogger());
         $processor->setEventDispatcher($eventDispatcher = new EventDispatcher());
 
         $processor->process(array());

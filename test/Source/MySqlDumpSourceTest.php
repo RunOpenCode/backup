@@ -14,8 +14,8 @@ namespace RunOpenCode\Backup\Tests\Source;
 
 use Psr\Log\NullLogger;
 use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Source\MySqlDumpSource;
-use RunOpenCode\Backup\Tests\Mockup\NullProfile;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
@@ -25,10 +25,9 @@ class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
      */
     public function successfulDumpAndCleanup()
     {
-        $settings = require_once __DIR__ .'/../Fixtures/config/mysqldump.php';
+        $settings = require_once file_exists($config = __DIR__ .'/../Fixtures/config/mysqldump.php') ? $config : __DIR__ .'/../Fixtures/config/mysqldump.dist.php';
         $source = new MySqlDumpSource($settings['database'], $settings['username'], $settings['password'], $settings['host'], $settings['port']);
 
-        $source->setLogger(new NullLogger());
         $source->setEventDispatcher($eventDispatcher = new EventDispatcher());
 
         $files = $source->fetch();
@@ -37,7 +36,7 @@ class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(file_exists($files[0]->getPath()), 'That file should exist prior to termination of backup process.');
 
-        $eventDispatcher->dispatch(BackupEvent::TERMINATE, new BackupEvent(new NullProfile()));
+        $eventDispatcher->dispatch(BackupEvents::TERMINATE, new BackupEvent());
 
         $this->assertFalse(file_exists($files[0]->getPath()), 'That file should not exist after termination of backup process.');
     }
@@ -49,10 +48,9 @@ class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
      */
     public function connectionError()
     {
-        $settings = require_once __DIR__ .'/../Fixtures/config/mysqldump.php';
+        $settings = require_once file_exists($config = __DIR__ .'/../Fixtures/config/mysqldump.php') ? $config : __DIR__ .'/../Fixtures/config/mysqldump.dist.php';
         $source = new MySqlDumpSource($settings['database'], $settings['username'], $settings['password'], 'www.non-existing-domain.com', $settings['port']);
 
-        $source->setLogger(new NullLogger());
         $source->setEventDispatcher($eventDispatcher = new EventDispatcher());
 
         $source->fetch();
@@ -65,10 +63,9 @@ class MySqlDumpSourceTest extends \PHPUnit_Framework_TestCase
      */
     public function databaseError()
     {
-        $settings = require_once __DIR__ .'/../Fixtures/config/mysqldump.php';
+        $settings = require_once file_exists($config = __DIR__ .'/../Fixtures/config/mysqldump.php') ? $config : __DIR__ .'/../Fixtures/config/mysqldump.dist.php';
         $source = new MySqlDumpSource('There is no way that you have database with this name.', $settings['username'], $settings['password'], $settings['host'], $settings['port']);
 
-        $source->setLogger(new NullLogger());
         $source->setEventDispatcher($eventDispatcher = new EventDispatcher());
 
         $source->fetch();

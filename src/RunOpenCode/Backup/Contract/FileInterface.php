@@ -13,7 +13,7 @@
 namespace RunOpenCode\Backup\Contract;
 
 /**
- * Class Backup
+ * Interface FileInterface
  *
  * Abstraction of one backup file.
  *

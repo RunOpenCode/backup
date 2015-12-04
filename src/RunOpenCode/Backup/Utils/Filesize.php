@@ -19,7 +19,7 @@ namespace RunOpenCode\Backup\Utils;
  *
  * @package RunOpenCode\Backup\Utils
  */
-abstract class Filesize
+final class Filesize
 {
     final private function __construct() {}
 

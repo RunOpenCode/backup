@@ -14,12 +14,10 @@ namespace RunOpenCode\Backup\Source;
 
 use RunOpenCode\Backup\Backup\File;
 use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
-use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Contract\SourceInterface;
-use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\SourceException;
-use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\Process\ProcessBuilder;
 
 /**
@@ -29,9 +27,8 @@ use Symfony\Component\Process\ProcessBuilder;
  *
  * @package RunOpenCode\Backup\Source
  */
-class MySqlDumpSource implements SourceInterface, LoggerAwareInterface, EventDispatcherAwareInterface
+class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
 {
-    use LoggerAwareTrait;
     use EventDispatcherAwareTrait;
 
     /**
@@ -94,22 +91,18 @@ class MySqlDumpSource implements SourceInterface, LoggerAwareInterface, EventDis
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $this->getLogger()->error(sprintf('Unable to dump MySql database "%s".', $this->database, array(
-                'process_error_output' => $process->getErrorOutput()
-            )));
-            throw new SourceException();
+            throw new SourceException(sprintf('Unable to dump MySql database "%s", reason: "".', $this->database, $process->getErrorOutput()));
         }
 
         $tmpFile = tempnam(sys_get_temp_dir(), preg_replace('/[^a-zA-Z0-9-_\.]/','', sprintf('mysql-dump-%s-%s', $this->database, $this->host)));
 
         if (@file_put_contents($tmpFile, $process->getOutput()) === false) {
 
-            $this->getLogger()->error(sprintf('Unable to save MySql dump of database into "%s".', $tmpFile));
-            throw new \RuntimeException();
+            throw new \RuntimeException(sprintf('Unable to save MySql dump of database into "%s".', $tmpFile));
 
         } else {
 
-            $this->getEventDispatcher()->addListener(BackupEvent::TERMINATE, function() use ($tmpFile) {
+            $this->getEventDispatcher()->addListener(BackupEvents::TERMINATE, function() use ($tmpFile) {
                 unlink($tmpFile);
             });
 

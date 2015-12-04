@@ -89,7 +89,6 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
         chmod($directory, 0200);
 
         $source = new GlobSource($directory . '/*');
-        $source->setLogger(new NullLogger());
         $source->fetch();
     }
 }

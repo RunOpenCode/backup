@@ -17,6 +17,7 @@ use RunOpenCode\Backup\Backup\File;
 use RunOpenCode\Backup\Contract\BackupInterface;
 use RunOpenCode\Backup\Contract\DestinationInterface;
 use RunOpenCode\Backup\Contract\LoggerAwareInterface;
+use RunOpenCode\Backup\Exception\DestinationException;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -69,14 +70,31 @@ class StreamDestination implements DestinationInterface, LoggerAwareInterface
     public function push(BackupInterface $backup)
     {
         $backupDirectory = sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $backup->getName());
+        $this->filesystem->mkdir($backupDirectory);
 
-        if (!$this->filesystem->exists($backupDirectory)) {
+        $existing = array();
 
-            $this->filesystem->mkdir($backupDirectory);
-
-        } else {
-            $currentFiles = Finder::create()->in($backupDirectory)->files();
+        foreach ($existingFiles = Finder::create()->in($backupDirectory)->files() as $existingFile) {
+            $file = File::fromLocal($existingFile, $backupDirectory);
+            $existing[$file->getRelativePath()] = $file;
         }
+
+        foreach ($backupFiles = $backup->getFiles() as $backupFile) {
+
+            try {
+                $this->filesystem->copy($backupFile, $filePath = sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
+                $this->filesystem->touch($filePath, $backupFile->getModifiedAt()->getTimestamp());
+            } catch (\Exception $e) {
+                throw new DestinationException(sprintf('Unable to backup file "%s" to destination "%s".', $backupFile->getPath(), $this->directory), 0, $e);
+            }
+
+            if ($existingFiles[$backupFile->getRelativePath()]) {
+                unset($existingFiles[$backupFile->getRelativePath()]);
+            }
+        }
+
+        $this->filesystem->remove($existingFiles);
+        $this->removeEmptyDirectories($backupDirectory);
 
     }
 
@@ -124,8 +142,12 @@ class StreamDestination implements DestinationInterface, LoggerAwareInterface
         if (is_null($this->backups)) {
             $this->load();
         }
+        try {
+            $this->filesystem->remove(sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $key));
+        } catch (\Exception $e) {
+            throw new DestinationException(sprintf('Unable to remove backup "%s" from stream destination "%s".', $key, $this->directory), 0, $e);
+        }
 
-        $this->filesystem->remove(sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $key));
     }
 
     /**
@@ -161,6 +183,23 @@ class StreamDestination implements DestinationInterface, LoggerAwareInterface
             }
 
             $this->backups[$backup->getName()] = $backup;
+        }
+    }
+
+    /**
+     * Remove empty directories from destination.
+     *
+     * @param $backupDirectory
+     */
+    protected function removeEmptyDirectories($backupDirectory)
+    {
+        foreach ($dirs = Finder::create()->directories()->in($backupDirectory)->depth(0) as $dir) {
+
+            if (Finder::create()->files()->in($dir)->count() > 0) {
+                $this->removeEmptyDirectories($dir);
+            } else {
+                $this->filesystem->remove($dir);
+            }
         }
     }
 }

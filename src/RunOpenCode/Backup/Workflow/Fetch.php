@@ -15,6 +15,7 @@ namespace RunOpenCode\Backup\Workflow;
 use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
 use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\EmptySourceException;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
@@ -44,7 +45,7 @@ class Fetch extends BaseActivity implements LoggerAwareInterface, EventDispatche
 
                 $this->backup->addFiles($files);
                 $this->getLogger()->info(sprintf('Source files successfully fetched, %s total files are scheduled for backup.', count($files)));
-                $this->getEventDispatcher()->dispatch(BackupEvent::FETCH, new BackupEvent($this->profile, $this->backup, $this));
+                $this->getEventDispatcher()->dispatch(BackupEvents::FETCH, new BackupEvent($this, $this->profile, $this->backup, $this));
 
             }
 

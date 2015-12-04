@@ -16,6 +16,7 @@ use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Contract\ManagerInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\EmptySourceException;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
@@ -104,7 +105,7 @@ final class Manager implements ManagerInterface
 
         } catch (\Exception $e) {
 
-            $this->eventDispatcher->dispatch(BackupEvent::ERROR, new BackupEvent($profile));
+            $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $profile));
             $this->logger->critical(sprintf('There has been an error while executing backup profile "%s".', $profile->getName()), array(
                 'message' => $e->getMessage(),
                 'code' => $e->getCode(),

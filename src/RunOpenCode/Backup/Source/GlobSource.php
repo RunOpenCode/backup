@@ -26,10 +26,11 @@ use RunOpenCode\Backup\Log\LoggerAwareTrait;
  *
  * @package RunOpenCode\Backup\Source
  */
-class GlobSource implements SourceInterface, LoggerAwareInterface
+class GlobSource implements SourceInterface
 {
-    use LoggerAwareTrait;
-
+    /**
+     * @var string[]
+     */
     private $globs;
 
     public function __construct($glob)
@@ -53,11 +54,7 @@ class GlobSource implements SourceInterface, LoggerAwareInterface
 
             if ($files === false) {
 
-                $this->getLogger()->error(sprintf('GlobSource expression "%s" is not correct and it fails getting list of files.', $glob), array(
-                    'glob' => $glob
-                ));
-
-                throw new SourceException();
+                throw new SourceException(sprintf('GlobSource expression "%s" is not correct and it fails getting list of files.', $glob));
 
             } elseif (count($files)) {
 

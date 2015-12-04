@@ -12,7 +12,6 @@
  */
 namespace RunOpenCode\Backup\Tests\Source;
 
-use Psr\Log\NullLogger;
 use RunOpenCode\Backup\Contract\FileInterface;
 use RunOpenCode\Backup\Source\GlobSource;
 use RunOpenCode\Backup\Source\SourceCollection;
@@ -29,11 +28,6 @@ class SourceCollectionTest extends \PHPUnit_Framework_TestCase
         $source
             ->add($src1 = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
             ->add($src2 = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet2') . '/*'));
-
-        $logger = new NullLogger();
-
-        $src1->setLogger($logger);
-        $src2->setLogger($logger);
 
         $files = $source->fetch();
 
@@ -65,11 +59,6 @@ class SourceCollectionTest extends \PHPUnit_Framework_TestCase
         $source
             ->add($src1 = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
             ->add($src2 = new GlobSource($directory. '/*'));
-
-        $logger = new NullLogger();
-
-        $src1->setLogger($logger);
-        $src2->setLogger($logger);
 
         $source->fetch();
     }

@@ -15,12 +15,10 @@ namespace RunOpenCode\Backup\Processor;
 use RunOpenCode\Backup\Backup\File;
 use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
 use RunOpenCode\Backup\Contract\FileInterface;
-use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Contract\ProcessorInterface;
-use RunOpenCode\Backup\Event\BackupEvent;
+use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\ProcessorException;
-use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\Process\ProcessBuilder;
 
 /**
@@ -30,10 +28,9 @@ use Symfony\Component\Process\ProcessBuilder;
  *
  * @package RunOpenCode\Backup\Processor
  */
-class ZipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInterface, LoggerAwareInterface
+class ZipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInterface
 {
     use EventDispatcherAwareTrait;
-    use LoggerAwareTrait;
 
     /**
      * @var string
@@ -70,11 +67,10 @@ class ZipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInt
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $this->getLogger()->error('Unable to create zip archive.');
-            throw new ProcessorException();
+            throw new ProcessorException(sprintf('Unable to create zip archive, reason: "%s".', $process->getErrorOutput()));
         }
 
-        $this->getEventDispatcher()->addListener(BackupEvent::TERMINATE, function() use ($tmpFile) {
+        $this->getEventDispatcher()->addListener(BackupEvents::TERMINATE, function() use ($tmpFile) {
             unlink($tmpFile);
         });
 
