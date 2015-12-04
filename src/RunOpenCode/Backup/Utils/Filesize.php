@@ -21,7 +21,7 @@ namespace RunOpenCode\Backup\Utils;
  */
 final class Filesize
 {
-    final private function __construct() {}
+    private function __construct() {}
 
     /**
      * Get bytes from formatted string size.

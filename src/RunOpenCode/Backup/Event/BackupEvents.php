@@ -66,5 +66,5 @@ final class BackupEvents
      */
     const ERROR = 'run_open_code.backup.error';
 
-    final private function __construct() { /* noop */}
+    private function __construct() { /* noop */}
 }

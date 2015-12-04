@@ -82,7 +82,7 @@ class StreamDestination implements DestinationInterface, LoggerAwareInterface
         foreach ($backupFiles = $backup->getFiles() as $backupFile) {
 
             try {
-                $this->filesystem->copy($backupFile, $filePath = sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
+                $this->filesystem->copy($backupFile->getPath(), $filePath = sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
                 $this->filesystem->touch($filePath, $backupFile->getModifiedAt()->getTimestamp());
             } catch (\Exception $e) {
                 throw new DestinationException(sprintf('Unable to backup file "%s" to destination "%s".', $backupFile->getPath(), $this->directory), 0, $e);
