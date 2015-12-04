@@ -52,13 +52,9 @@ class SourceCollectionTest extends \PHPUnit_Framework_TestCase
     {
         $source = new SourceCollection();
 
-        $directory = realpath(__DIR__ . '/../Fixtures/glob/globCanNotReadThis');
-
-        chmod($directory, 0200);
-
         $source
-            ->add($src1 = new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
-            ->add($src2 = new GlobSource($directory. '/*'));
+            ->add(new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'))
+            ->add(new GlobSource('/**/*.(txt)'));
 
         $source->fetch();
     }
