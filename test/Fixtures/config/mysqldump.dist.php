@@ -19,7 +19,7 @@
 return array(
     'username' => 'root',
     'password' => null,
-    'host' => null,
-    'port' => 3306,
+    'host' => '127.0.0.1',
+    'port' => null,
     'database' => 'test_database'
 );

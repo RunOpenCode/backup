@@ -77,7 +77,12 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
             ->add(sprintf('-u%s', $this->user));
 
         if (!is_null($this->host)) {
-            $processBuilder->add(sprintf('-h%s:%s', $this->host, $this->port));
+
+            if (!is_null($this->port)) {
+                $processBuilder->add(sprintf('-h%s:%s', $this->host, $this->port));
+            } else {
+                $processBuilder->add(sprintf('-h%s', $this->host, $this->port));
+            }
         }
 
         if (null !== $this->password) {
