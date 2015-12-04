@@ -84,11 +84,7 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
      */
     public function invalidGlob()
     {
-        $directory = realpath(__DIR__ . '/../Fixtures/glob/globCanNotReadThis');
-
-        chmod($directory, 0200);
-
-        $source = new GlobSource($directory . '/*');
+        $source = new GlobSource('/**/*.(txt)');
         $source->fetch();
     }
 }
