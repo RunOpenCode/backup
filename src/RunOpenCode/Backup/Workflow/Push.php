@@ -26,7 +26,7 @@ use RunOpenCode\Backup\Log\LoggerAwareTrait;
  *
  * @package RunOpenCode\Backup\Workflow
  */
-class Push  extends BaseActivity implements LoggerAwareInterface, EventDispatcherAwareInterface
+class Push extends BaseActivity implements LoggerAwareInterface, EventDispatcherAwareInterface
 {
     use LoggerAwareTrait;
     use EventDispatcherAwareTrait;

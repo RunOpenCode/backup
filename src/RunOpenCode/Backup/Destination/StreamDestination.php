@@ -92,7 +92,7 @@ class StreamDestination implements DestinationInterface
         $this->filesystem->remove($existingFiles);
         $this->removeEmptyDirectories($backupDirectory);
 
-        if ($this->backups) {
+        if (!empty($this->backups)) {
             $this->backups[] = $backup;
         }
     }
