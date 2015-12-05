@@ -118,7 +118,7 @@ final class Manager implements ManagerInterface
 
             try {
 
-                $this->eventDispatcher->dispatch(BackupEvent::TERMINATE, new BackupEvent($profile));
+                $this->eventDispatcher->dispatch(BackupEvents::TERMINATE, new BackupEvent($profile));
                 $this->logger->info(sprintf('Backup for profile "%s" successfully terminated.', $profile->getName()));
 
             } catch (\Exception $e) {

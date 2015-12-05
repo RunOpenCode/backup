@@ -73,7 +73,7 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
                 return $file->getRelativePath();
             }, $files),
             false,
-            'Relative path must be as define since glob root path is given.'
+            'Relative path must be as defined since glob root path is given.'
         );
     }
 

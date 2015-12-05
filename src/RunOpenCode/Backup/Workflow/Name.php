@@ -31,6 +31,9 @@ class Name extends BaseActivity implements LoggerAwareInterface, EventDispatcher
     use LoggerAwareTrait;
     use EventDispatcherAwareTrait;
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute()
     {
         try {

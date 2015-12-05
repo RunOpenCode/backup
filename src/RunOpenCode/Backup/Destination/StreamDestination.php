@@ -16,9 +16,7 @@ use RunOpenCode\Backup\Backup\Backup;
 use RunOpenCode\Backup\Backup\File;
 use RunOpenCode\Backup\Contract\BackupInterface;
 use RunOpenCode\Backup\Contract\DestinationInterface;
-use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Exception\DestinationException;
-use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
@@ -29,10 +27,8 @@ use Symfony\Component\Finder\Finder;
  *
  * @package RunOpenCode\Backup\Destination
  */
-class StreamDestination implements DestinationInterface, LoggerAwareInterface
+class StreamDestination implements DestinationInterface
 {
-    use LoggerAwareTrait;
-
     /**
      * @var BackupInterface[]
      */
@@ -96,6 +92,9 @@ class StreamDestination implements DestinationInterface, LoggerAwareInterface
         $this->filesystem->remove($existingFiles);
         $this->removeEmptyDirectories($backupDirectory);
 
+        if ($this->backups) {
+            $this->backups[] = $backup;
+        }
     }
 
     /**
@@ -139,15 +138,15 @@ class StreamDestination implements DestinationInterface, LoggerAwareInterface
      */
     public function delete($key)
     {
-        if (is_null($this->backups)) {
-            $this->load();
-        }
         try {
             $this->filesystem->remove(sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $key));
         } catch (\Exception $e) {
             throw new DestinationException(sprintf('Unable to remove backup "%s" from stream destination "%s".', $key, $this->directory), 0, $e);
         }
 
+        if (!is_null($this->backups)) {
+            unset($this->backups[$key]);
+        }
     }
 
     /**

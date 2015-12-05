@@ -31,6 +31,9 @@ class Process extends BaseActivity implements LoggerAwareInterface, EventDispatc
     use LoggerAwareTrait;
     use EventDispatcherAwareTrait;
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute()
     {
         try {

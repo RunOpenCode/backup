@@ -32,6 +32,9 @@ class Fetch extends BaseActivity implements LoggerAwareInterface, EventDispatche
     use LoggerAwareTrait;
     use EventDispatcherAwareTrait;
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute()
     {
         try {

@@ -155,4 +155,24 @@ final class File implements FileInterface
             filemtime($path)
         );
     }
+
+    /**
+     * Create file instane from \SplFileInfo instance.
+     *
+     * @param \SplFileInfo $file
+     * @param null|string $rootPath Root path of file.
+     * @param null|string $name Filename to use instead of original one (if provided).
+     * @return static
+     */
+    public static function fromSplFileInfo(\SplFileInfo $file, $rootPath = null, $name = null)
+    {
+        return new static(
+            is_null($name) ? $file->getFilename() : $name,
+            $file->getPath(),
+            $rootPath,
+            $file->getSize(),
+            $file->getCTime(),
+            $file->getMTime()
+        );
+    }
 }
