@@ -47,10 +47,11 @@ class SourceCollectionTest extends \PHPUnit_Framework_TestCase
      * @test
      *
      * @expectedException \RunOpenCode\Backup\Exception\SourceException
-     * @requires PHP
      */
     public function ifOneSourceFailsWholeCollectionFails()
     {
+        if(defined('HHVM_VERSION')) $this->markTestSkipped(); // non HHVM
+
         $source = new SourceCollection();
 
         $source

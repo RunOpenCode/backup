@@ -81,10 +81,11 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
      * @test
      *
      * @expectedException \RunOpenCode\Backup\Exception\SourceException
-     * @requires PHP
      */
     public function invalidGlob()
     {
+        if(defined('HHVM_VERSION')) $this->markTestSkipped(); // non HHVM
+
         $source = new GlobSource('/**/*.(txt)');
         $source->fetch();
     }
