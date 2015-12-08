@@ -25,7 +25,7 @@ class FlysystemDestination implements DestinationInterface
      */
     public function push(BackupInterface $backup)
     {
-        // TODO: Implement push() method.
+        throw new DestinationException('Flysystem is not implemented yet.');
     }
 
     /**

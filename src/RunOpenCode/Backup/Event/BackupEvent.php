@@ -28,7 +28,7 @@ final class BackupEvent extends GenericEvent
 {
     public function __construct($subject = null, ProfileInterface $profile = null, BackupInterface $backup = null, WorkflowActivityInterface $activity = null)
     {
-        parent::__construct($subject, $arguments = array(
+        parent::__construct($subject, array(
             'profile' => $profile,
             'backup' => $backup,
             'activity' => $activity
