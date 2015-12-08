@@ -55,7 +55,10 @@ final class Backup implements BackupInterface
         $this->size = $size;
         $this->createdAt = is_null($createdAt) ? new \DateTime('now') : $createdAt;
         $this->modifiedAt = is_null($modifiedAt) ? new \DateTime('now') : $modifiedAt;
-        $this->setFiles($files);
+
+        if (count($files)) {
+            $this->setFiles($files);
+        }
     }
 
     /**

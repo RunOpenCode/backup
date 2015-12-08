@@ -56,14 +56,7 @@ class Workflow
         $this->profile = $profile;
         $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger;
-        $this->activities = array_merge(array(
-            Fetch::class,
-            Process::class,
-            Name::class,
-            PreRotate::class,
-            Push::class,
-            PostRotate::class
-        ), $activities);
+        $this->activities = count($activities) ? $activities : array(new Fetch(), new Process(), new Name(), new PreRotate(), new Push(), new PostRotate());
     }
 
     public function execute()
@@ -73,11 +66,10 @@ class Workflow
         $this->logger->info(sprintf('About to execute backup for profile: "%s".', $this->profile->getName()));
         $this->eventDispatcher->dispatch(BackupEvents::BEGIN, new BackupEvent($this, $this->profile, $backup));
 
-        foreach ($this->activities as $activityClass) {
-            /**
-             * @var WorkflowActivityInterface $activity
-             */
-            $activity = new $activityClass();
+        /**
+         * @var WorkflowActivityInterface $activity
+         */
+        foreach ($this->activities as $activity) {
 
             $activity
                 ->setBackup($backup)
@@ -101,7 +93,6 @@ class Workflow
 
                 throw $e;
             }
-
         }
     }
 }

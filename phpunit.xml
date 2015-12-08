@@ -15,6 +15,9 @@
             <directory suffix="Test.php">./test/Processor</directory>
         </testsuite>
 
+        <testsuite name="Rotator tests">
+            <directory suffix="Test.php">./test/Rotator</directory>
+        </testsuite>
 
     </testsuites>
 
