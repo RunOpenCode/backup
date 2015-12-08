@@ -12,11 +12,9 @@
  */
 namespace RunOpenCode\Backup\Workflow;
 
-use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Contract\BackupInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
 use RunOpenCode\Backup\Contract\WorkflowActivityInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class BaseActivity

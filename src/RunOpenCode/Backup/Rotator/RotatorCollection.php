@@ -43,7 +43,7 @@ class RotatorCollection implements \IteratorAggregate, RotatorInterface
         /** @var RotatorInterface $rotator */
         foreach ($this->rotators as $rotator) {
 
-            foreach ($nominations = $rotator->nominate($backups) as $nomination) {
+            foreach ($rotator->nominate($backups) as $nomination) {
 
                 if (!in_array($nomination, $result)) {
                     $result[] = $nomination;

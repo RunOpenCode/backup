@@ -1,5 +1,10 @@
 # Simple web application backup library
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/RunOpenCode/backup/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/RunOpenCode/backup/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/RunOpenCode/backup/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/RunOpenCode/backup/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/RunOpenCode/backup/badges/build.png?b=master)](https://scrutinizer-ci.com/g/RunOpenCode/backup/build-status/master)
+[![Build Status](https://travis-ci.org/RunOpenCode/backup.svg?branch=master)](https://travis-ci.org/RunOpenCode/backup)
+
 This library is fork of 'kbond/php-backup' library with significant modifications which disables compatibility
 with its original.
 

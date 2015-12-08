@@ -12,12 +12,9 @@
  */
 namespace RunOpenCode\Backup\Source;
 
-use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Backup\File;
-use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Contract\SourceInterface;
 use RunOpenCode\Backup\Exception\SourceException;
-use RunOpenCode\Backup\Log\LoggerAwareTrait;
 
 /**
  * Class GlobSource
@@ -50,7 +47,7 @@ class GlobSource implements SourceInterface
         $backupFiles = array();
 
         foreach ($this->globs as $glob => $rootPath) {
-            $files = @glob($glob, GLOB_ERR);
+            $files = glob($glob, GLOB_ERR);
 
             if ($files === false) {
 

@@ -23,6 +23,15 @@ final class Filesize
 {
     private function __construct() {}
 
+    private static $units = array(
+        't' => 8796093022208,
+        'tb' => 8796093022208,
+        'g' => 8589934592,
+        'gb' => 8589934592,
+        'm' => 8388608,
+        'mb' => 8388608
+    );
+
     /**
      * Get bytes from formatted string size.
      *
@@ -45,16 +54,7 @@ final class Filesize
 
         $size = strtolower(trim($size));
 
-        $units = array(
-            't' => (pow(1024, 4) * 8),
-            'g' => (pow(1024, 3) * 8),
-            'm' => (pow(1024, 2) * 8),
-            'tb' => (pow(1024, 4) * 8),
-            'gb' => (pow(1024, 3) * 8),
-            'mb' => (pow(1024, 2) * 8)
-        );
-
-        foreach ($units as $unit => $bytes) {
+        foreach (self::$units as $unit => $bytes) {
 
             if (($temp = strlen($size) - strlen($unit)) >= 0 && strpos($size, $unit, $temp) !== false) {
 

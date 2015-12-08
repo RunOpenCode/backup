@@ -104,7 +104,7 @@ class FlysystemDestination implements DestinationInterface
         /**
          * @var \SplFileInfo $content
          */
-        foreach ($contents = $this->flysystem->listContents() as $content) {
+        foreach ($this->flysystem->listContents() as $content) {
 
             if ($content->isDir()) {
 
@@ -113,7 +113,7 @@ class FlysystemDestination implements DestinationInterface
                 /**
                  * @var \SplFileInfo $backupFile
                  */
-                foreach ($backupFiles = $this->flysystem->listContents($content->getBasename(), true) as $backupFile) {
+                foreach ($this->flysystem->listContents($content->getBasename(), true) as $backupFile) {
 
                     if ($backupFile->isFile()) {
 

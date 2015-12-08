@@ -12,7 +12,6 @@
  */
 namespace RunOpenCode\Backup\Contract;
 
-use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Exception\DestinationException;
 
 /**

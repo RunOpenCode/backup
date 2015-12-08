@@ -68,14 +68,14 @@ class StreamDestination implements DestinationInterface
         $backupDirectory = sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $backup->getName());
         $this->filesystem->mkdir($backupDirectory);
 
-        $existing = array();
+        $existingBackupFiles = array();
 
-        foreach ($existingFiles = Finder::create()->in($backupDirectory)->files() as $existingFile) {
+        foreach (Finder::create()->in($backupDirectory)->files() as $existingFile) {
             $file = File::fromLocal($existingFile, $backupDirectory);
-            $existing[$file->getRelativePath()] = $file;
+            $existingBackupFiles[$file->getRelativePath()] = $file;
         }
 
-        foreach ($backupFiles = $backup->getFiles() as $backupFile) {
+        foreach ($backup->getFiles() as $backupFile) {
 
             try {
                 $this->filesystem->copy($backupFile->getPath(), $filePath = sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
@@ -84,12 +84,12 @@ class StreamDestination implements DestinationInterface
                 throw new DestinationException(sprintf('Unable to backup file "%s" to destination "%s".', $backupFile->getPath(), $this->directory), 0, $e);
             }
 
-            if ($existingFiles[$backupFile->getRelativePath()]) {
-                unset($existingFiles[$backupFile->getRelativePath()]);
+            if ($existingBackupFiles[$backupFile->getRelativePath()]) {
+                unset($existingBackupFiles[$backupFile->getRelativePath()]);
             }
         }
 
-        $this->filesystem->remove($existingFiles);
+        $this->filesystem->remove($existingBackupFiles);
         $this->removeEmptyDirectories($backupDirectory);
 
         if (!empty($this->backups)) {
@@ -170,13 +170,11 @@ class StreamDestination implements DestinationInterface
     {
         $this->backups = array();
 
-        $backupDirectories = Finder::create()->in($this->directory)->depth(0)->directories()->sortByModifiedTime();
-
-        foreach ($backupDirectories as $backupDirectory) {
+        foreach (Finder::create()->in($this->directory)->depth(0)->directories()->sortByModifiedTime() as $backupDirectory) {
 
             $backup = new Backup(basename($backupDirectory), array(), 0, filectime($backupDirectory), filemtime($backupDirectory));
 
-            foreach ($backupFiles = Finder::create()->in($backupDirectory)->files() as $backupFile) {
+            foreach (Finder::create()->in($backupDirectory)->files() as $backupFile) {
 
                 $backup->addFile(File::fromLocal($backupFile, $backupDirectory));
             }
@@ -192,7 +190,7 @@ class StreamDestination implements DestinationInterface
      */
     protected function removeEmptyDirectories($backupDirectory)
     {
-        foreach ($dirs = Finder::create()->directories()->in($backupDirectory)->depth(0) as $dir) {
+        foreach (Finder::create()->directories()->in($backupDirectory)->depth(0) as $dir) {
 
             if (Finder::create()->files()->in($dir)->count() > 0) {
                 $this->removeEmptyDirectories($dir);
