@@ -49,9 +49,9 @@ class StreamDestination implements DestinationInterface
         $this->directory = $directory;
         $this->filesystem = is_null($filesystem) ? new Filesystem() : $filesystem;
 
-        if (!$filesystem->exists($this->directory)) {
+        if (!$this->filesystem->exists($this->directory)) {
 
-            $filesystem->mkdir($this->directory);
+            $this->filesystem->mkdir($this->directory);
 
         } elseif (!is_dir($this->directory)) {
             throw new \RuntimeException(sprintf('Provided location "%s" is not directory.', $this->directory));
@@ -84,7 +84,7 @@ class StreamDestination implements DestinationInterface
                 throw new DestinationException(sprintf('Unable to backup file "%s" to destination "%s".', $backupFile->getPath(), $this->directory), 0, $e);
             }
 
-            if ($existingBackupFiles[$backupFile->getRelativePath()]) {
+            if (array_key_exists($backupFile->getRelativePath(), $existingBackupFiles) && $existingBackupFiles[$backupFile->getRelativePath()]) {
                 unset($existingBackupFiles[$backupFile->getRelativePath()]);
             }
         }
@@ -112,40 +112,40 @@ class StreamDestination implements DestinationInterface
     /**
      * {@inheritdoc}
      */
-    public function get($key)
+    public function get($name)
     {
         if (is_null($this->backups)) {
             $this->load();
         }
 
-        return $this->backups[$key];
+        return $this->backups[$name];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function has($key)
+    public function has($name)
     {
         if (is_null($this->backups)) {
             $this->load();
         }
 
-        return array_key_exists($key, $this->backups);
+        return array_key_exists($name, $this->backups);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete($key)
+    public function delete($name)
     {
         try {
-            $this->filesystem->remove(sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $key));
+            $this->filesystem->remove(sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $name));
         } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to remove backup "%s" from stream destination "%s".', $key, $this->directory), 0, $e);
+            throw new DestinationException(sprintf('Unable to remove backup "%s" from stream destination "%s".', $name, $this->directory), 0, $e);
         }
 
         if (!is_null($this->backups)) {
-            unset($this->backups[$key]);
+            unset($this->backups[$name]);
         }
     }
 
@@ -170,13 +170,19 @@ class StreamDestination implements DestinationInterface
     {
         $this->backups = array();
 
+        /**
+         * @var \SplFileInfo $backupDirectory
+         */
         foreach (Finder::create()->in($this->directory)->depth(0)->directories()->sortByModifiedTime() as $backupDirectory) {
 
-            $backup = new Backup(basename($backupDirectory), array(), 0, filectime($backupDirectory), filemtime($backupDirectory));
+            $backup = new Backup($backupDirectory->getBasename(), array(), 0, $backupDirectory->getCTime(), $backupDirectory->getMTime());
 
-            foreach (Finder::create()->in($backupDirectory)->files() as $backupFile) {
+            /**
+             * @var \SplFileInfo $backupFile
+             */
+            foreach (Finder::create()->in($backupDirectory->getPathname())->files() as $backupFile) {
 
-                $backup->addFile(File::fromLocal($backupFile, $backupDirectory));
+                $backup->addFile(File::fromSplFileInfo($backupFile, $backupDirectory->getPathname()));
             }
 
             $this->backups[$backup->getName()] = $backup;
@@ -190,13 +196,24 @@ class StreamDestination implements DestinationInterface
      */
     protected function removeEmptyDirectories($backupDirectory)
     {
+        /**
+         * @var \SplFileInfo $dir
+         */
         foreach (Finder::create()->directories()->in($backupDirectory)->depth(0) as $dir) {
 
-            if (Finder::create()->files()->in($dir)->count() > 0) {
-                $this->removeEmptyDirectories($dir);
+            if (Finder::create()->files()->in($dir->getPathname())->count() > 0) {
+                $this->removeEmptyDirectories($dir->getPathname());
             } else {
-                $this->filesystem->remove($dir);
+                $this->filesystem->remove($dir->getPathname());
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return count($this->getIterator());
     }
 }

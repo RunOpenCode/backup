@@ -80,35 +80,35 @@ final class ReplicatedDestination implements DestinationInterface
     /**
      * {@inheritdoc}
      */
-    public function get($key)
+    public function get($name)
     {
-        return $this->master->get($key);
+        return $this->master->get($name);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function has($key)
+    public function has($name)
     {
-       return $this->master->has($key);
+       return $this->master->has($name);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete($key)
+    public function delete($name)
     {
-        $this->master->delete($key);
+        $this->master->delete($name);
 
         try {
-            $this->slave->delete($key);
+            $this->slave->delete($name);
         } catch (\Exception $e) {
 
             if ($this->atomic) {
                 throw $e;
             } else {
 
-                $this->getLogger()->error(sprintf('Unable to delete backyp "%s" from slave destination.', $key), array(
+                $this->getLogger()->error(sprintf('Unable to delete backyp "%s" from slave destination.', $name), array(
                     'message' => $e->getMessage(),
                     'code' => $e->getCode(),
                     'file' => $e->getFile(),
@@ -133,5 +133,13 @@ final class ReplicatedDestination implements DestinationInterface
     public function getIterator()
     {
         return $this->master->getIterator();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return $this->master->count();
     }
 }

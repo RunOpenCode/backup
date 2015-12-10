@@ -168,7 +168,7 @@ final class File implements FileInterface
     {
         return new static(
             is_null($name) ? $file->getFilename() : $name,
-            $file->getPath(),
+            $file->getPathname(),
             $rootPath,
             $file->getSize(),
             $file->getCTime(),

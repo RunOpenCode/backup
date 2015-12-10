@@ -43,7 +43,7 @@ class NullDestination implements DestinationInterface
     /**
      * {@inheritdoc}
      */
-    public function get($key)
+    public function get($name)
     {
         throw new \RuntimeException('Null destination does not have backups to fetch.');
     }
@@ -51,7 +51,7 @@ class NullDestination implements DestinationInterface
     /**
      * {@inheritdoc}
      */
-    public function delete($key)
+    public function delete($name)
     {
         throw new \RuntimeException('Null destination does not have backups to delete.');
     }
@@ -67,8 +67,16 @@ class NullDestination implements DestinationInterface
     /**
      * {@inheritdoc}
      */
-    public function has($key)
+    public function has($name)
     {
         return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return 0;
     }
 }

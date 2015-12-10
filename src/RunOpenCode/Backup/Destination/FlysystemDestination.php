@@ -31,40 +31,40 @@ class FlysystemDestination implements DestinationInterface
     /**
      * {@inheritdoc}
      */
-    public function get($key)
+    public function get($name)
     {
         if (is_null($this->backups)) {
             $this->load();
         }
 
-        return $this->backups[$key];
+        return $this->backups[$name];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function has($key)
+    public function has($name)
     {
         if (is_null($this->backups)) {
             $this->load();
         }
 
-        return array_key_exists($key, $this->backups);
+        return array_key_exists($name, $this->backups);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete($key)
+    public function delete($name)
     {
         try {
-            $this->flysystem->deleteDir($key);
+            $this->flysystem->deleteDir($name);
         } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to remove backup "%s" from flysystem destination.', $key), 0, $e);
+            throw new DestinationException(sprintf('Unable to remove backup "%s" from flysystem destination.', $name), 0, $e);
         }
 
         if (!is_null($this->backups)) {
-            unset($this->backups[$key]);
+            unset($this->backups[$name]);
         }
     }
 
@@ -124,5 +124,13 @@ class FlysystemDestination implements DestinationInterface
                 $this->backups[$backup->getName()] = $backup;
             }
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return count($this->getIterator());
     }
 }

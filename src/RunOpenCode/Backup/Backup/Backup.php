@@ -10,17 +10,16 @@
  * This project is fork of "kbond/php-backup", for full credits info, please
  * view CREDITS file that was distributed with this source code.
  */
+
 namespace RunOpenCode\Backup\Backup;
 
 use RunOpenCode\Backup\Contract\FileInterface;
 use RunOpenCode\Backup\Contract\BackupInterface;
 
 /**
- * Class Backup
+ * Class Backup.
  *
  * Backup is abstraction of collection of files for backup.
- *
- * @package RunOpenCode\Backup\Backup
  */
 final class Backup implements BackupInterface
 {
@@ -75,6 +74,7 @@ final class Backup implements BackupInterface
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -91,6 +91,7 @@ final class Backup implements BackupInterface
     {
         $this->files[] = $file;
         $this->size += $file->getSize();
+
         return $this;
     }
 
@@ -112,6 +113,7 @@ final class Backup implements BackupInterface
         foreach ($this->files as $file) {
             $this->size += $file->getSize();
         }
+
         return $this;
     }
 
@@ -129,6 +131,7 @@ final class Backup implements BackupInterface
     public function setSize($size)
     {
         $this->size = $size;
+
         return $this;
     }
 
@@ -146,6 +149,7 @@ final class Backup implements BackupInterface
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = \DateTimeImmutable::createFromMutable((is_integer($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt));
+
         return $this;
     }
 
@@ -163,6 +167,7 @@ final class Backup implements BackupInterface
     public function setModifiedAt($modifiedAt)
     {
         $this->modifiedAt = \DateTimeImmutable::createFromMutable((is_integer($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt));
+
         return $this;
     }
 }

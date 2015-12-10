@@ -57,26 +57,26 @@ final class DestinationCollection implements DestinationInterface
     /**
      * {@inheritdoc}
      */
-    public function get($key)
+    public function get($name)
     {
-        return $this->destinations[0]->get($key);
+        return $this->destinations[0]->get($name);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function has($key)
+    public function has($name)
     {
-        return $this->destinations[0]->has($key);
+        return $this->destinations[0]->has($name);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete($key)
+    public function delete($name)
     {
         foreach ($this->destinations as $destination) {
-            $destination->delete($key);
+            $destination->delete($name);
         }
     }
 
@@ -94,5 +94,13 @@ final class DestinationCollection implements DestinationInterface
     public function getIterator()
     {
         return $this->destinations[0]->getIterator();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return $this->destinations[0]->count();
     }
 }

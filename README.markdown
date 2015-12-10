@@ -5,6 +5,8 @@
 [![Build Status](https://scrutinizer-ci.com/g/RunOpenCode/backup/badges/build.png?b=master)](https://scrutinizer-ci.com/g/RunOpenCode/backup/build-status/master)
 [![Build Status](https://travis-ci.org/RunOpenCode/backup.svg?branch=master)](https://travis-ci.org/RunOpenCode/backup)
 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/630d6a08-9ff8-4099-adda-8ff33e29a329/big.png)](https://insight.sensiolabs.com/projects/630d6a08-9ff8-4099-adda-8ff33e29a329)
+
 This library is fork of 'kbond/php-backup' library with significant modifications which disables compatibility
 with its original.
 

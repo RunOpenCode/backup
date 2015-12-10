@@ -21,7 +21,7 @@ use RunOpenCode\Backup\Exception\DestinationException;
  *
  * @package RunOpenCode\Backup\Contract
  */
-interface DestinationInterface extends \IteratorAggregate
+interface DestinationInterface extends \IteratorAggregate, \Countable
 {
     /**
      * Push backup to destination.
@@ -34,26 +34,26 @@ interface DestinationInterface extends \IteratorAggregate
     /**
      * Get backup.
      *
-     * @param string $key
+     * @param string $name
      * @return BackupInterface
      */
-    public function get($key);
+    public function get($name);
 
     /**
      * Check if backup exists.
      *
-     * @param $key
+     * @param $name
      * @return boolean
      */
-    public function has($key);
+    public function has($name);
 
     /**
      * Delete backup.
      *
-     * @param $key
+     * @param $name
      * @throws DestinationException
      */
-    public function delete($key);
+    public function delete($name);
 
     /**
      * Get all backups.
