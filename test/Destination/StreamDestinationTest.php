@@ -40,7 +40,7 @@ class StreamDestinationTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->filesystem = new Filesystem();
-        $this->directory = realpath(__DIR__ . '/../Fixtures/destination');
+        $this->directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'roc_backup_destination';
         $this->destination = new StreamDestination($this->directory, $this->filesystem);
     }
 
