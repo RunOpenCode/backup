@@ -41,7 +41,12 @@ abstract class BaseStreamDestinationTest extends \PHPUnit_Framework_TestCase
 
     protected function clearDestination()
     {
-        $this->filesystem->remove(Finder::create()->in($this->directory));
+        try {
+            $this->filesystem->remove(Finder::create()->in($this->directory));
+        } catch (\Exception $e) {
+            // noop
+        }
+
         return $this;
     }
 
