@@ -157,7 +157,7 @@ final class File implements FileInterface
     }
 
     /**
-     * Create file instane from \SplFileInfo instance.
+     * Create file instance from \SplFileInfo instance.
      *
      * @param \SplFileInfo $file
      * @param null|string $rootPath Root path of file.

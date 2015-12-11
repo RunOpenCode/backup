@@ -64,8 +64,7 @@ final class ReplicatedDestination implements DestinationInterface
 
             if ($this->atomic) {
                 throw $e;
-            } else {
-
+            } elseif ($this->getLogger()) {
                 $this->getLogger()->error('Unable to backup to slave destination.', array(
                     'message' => $e->getMessage(),
                     'code' => $e->getCode(),
@@ -108,7 +107,7 @@ final class ReplicatedDestination implements DestinationInterface
                 throw $e;
             } else {
 
-                $this->getLogger()->error(sprintf('Unable to delete backyp "%s" from slave destination.', $name), array(
+                $this->getLogger()->error(sprintf('Unable to delete backup "%s" from slave destination.', $name), array(
                     'message' => $e->getMessage(),
                     'code' => $e->getCode(),
                     'file' => $e->getFile(),

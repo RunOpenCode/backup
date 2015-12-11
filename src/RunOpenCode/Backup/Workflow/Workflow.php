@@ -75,16 +75,24 @@ class Workflow
                 ->setBackup($backup)
                 ->setProfile($this->profile);
 
+            /**
+             * @var LoggerAwareInterface $activity
+             */
             if ($activity instanceof LoggerAwareInterface) {
                 $activity->setLogger($this->logger);
             }
 
+            /**
+             * @var EventDispatcherAwareInterface $activity
+             */
             if ($activity instanceof EventDispatcherAwareInterface) {
                 $activity->setEventDispatcher($this->eventDispatcher);
             }
 
             try {
-
+                /**
+                 * @var WorkflowActivityInterface $activity
+                 */
                 $activity->execute();
 
             } catch (\Exception $e) {

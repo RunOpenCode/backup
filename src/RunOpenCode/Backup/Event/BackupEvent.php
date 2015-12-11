@@ -20,7 +20,7 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 /**
  * Class BackupEvent
  *
- * Backup event is event instance that is dispatched troughout backup library.
+ * Backup event is event instance that is dispatched throughout backup library.
  *
  * @package RunOpenCode\Backup\Event
  */

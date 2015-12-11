@@ -101,7 +101,7 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
 
         $tmpFile = tempnam(sys_get_temp_dir(), preg_replace('/[^a-zA-Z0-9-_\.]/','', sprintf('mysql-dump-%s-%s', $this->database, $this->host)));
 
-        if (@file_put_contents($tmpFile, $process->getOutput()) === false) {
+        if (file_put_contents($tmpFile, $process->getOutput()) === false) {
 
             throw new \RuntimeException(sprintf('Unable to save MySql dump of database into "%s".', $tmpFile));
 

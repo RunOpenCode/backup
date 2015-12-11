@@ -72,7 +72,7 @@ class StreamDestination implements DestinationInterface
 
         foreach (Finder::create()->in($backupDirectory)->files() as $existingFile) {
             $file = File::fromLocal($existingFile, $backupDirectory);
-            $existingBackupFiles[$file->getRelativePath()] = $file;
+            $existingBackupFiles[$file->getRelativePath()] = $file->getPath();
         }
 
         foreach ($backup->getFiles() as $backupFile) {
