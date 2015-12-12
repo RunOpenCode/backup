@@ -99,7 +99,7 @@ final class Manager implements ManagerInterface
 
             $workflow->execute();
 
-        } catch(EmptySourceException $e) {
+        } catch (EmptySourceException $e) {
 
             $this->logger->info(sprintf('Backup for profile "%s" didn\'t yield any file for backup.', $profile->getName()));
 

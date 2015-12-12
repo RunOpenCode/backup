@@ -46,7 +46,7 @@ class StreamDestination implements DestinationInterface
 
     public function __construct($directory, Filesystem $filesystem = null)
     {
-        $this->directory = $directory;
+        $this->directory = rtrim($directory, '/\\');
         $this->filesystem = is_null($filesystem) ? new Filesystem() : $filesystem;
 
         if (!$this->filesystem->exists($this->directory)) {
@@ -65,33 +65,40 @@ class StreamDestination implements DestinationInterface
      */
     public function push(BackupInterface $backup)
     {
-        $backupDirectory = sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $backup->getName());
+        // Prepare destination.
+        $backupDirectory = $this->directory . DIRECTORY_SEPARATOR . $backup->getName();
         $this->filesystem->mkdir($backupDirectory);
 
-        $existingBackupFiles = array();
-
-        foreach (Finder::create()->in($backupDirectory)->files() as $existingFile) {
-            $file = File::fromLocal($existingFile, $backupDirectory);
-            $existingBackupFiles[$file->getRelativePath()] = $file->getPath();
-        }
+        // Get current in backup location (if it is an incremental backup).
+        $existingBackupFiles = $this->getFiles($backupDirectory);
 
         foreach ($backup->getFiles() as $backupFile) {
 
             try {
-                $this->filesystem->copy($backupFile->getPath(), $filePath = sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
-                $this->filesystem->touch($filePath, $backupFile->getModifiedAt()->getTimestamp());
+                // Overwrite old, copy new to destination.
+                $this->filesystem->copy($backupFile->getPath(), sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
             } catch (\Exception $e) {
                 throw new DestinationException(sprintf('Unable to backup file "%s" to destination "%s".', $backupFile->getPath(), $this->directory), 0, $e);
             }
 
-            if (array_key_exists($backupFile->getRelativePath(), $existingBackupFiles) && $existingBackupFiles[$backupFile->getRelativePath()]) {
+            // If existing file is overwritten, remove it from the list of current files in backup destination.
+            if (isset($existingBackupFiles[$backupFile->getRelativePath()])) {
                 unset($existingBackupFiles[$backupFile->getRelativePath()]);
             }
         }
 
-        $this->filesystem->remove($existingBackupFiles);
-        $this->removeEmptyDirectories($backupDirectory);
+        try {
+            // Remove deleted files from source from destination.
+            $this->filesystem->remove(array_map(function(File $file) { return $file->getPath(); }, $existingBackupFiles));
 
+            // Cleanup empty directories, there is no need to keep them.
+            $this->removeEmptyDirectories($backupDirectory);
+        } catch (\Exception $e) {
+            throw new DestinationException(sprintf('Unable to backup cleanup destination "%s" after backup process.', $this->directory), 0, $e);
+        }
+
+
+        // Don't reload, just add new backup to list if possible.
         if (!empty($this->backups)) {
             $this->backups[] = $backup;
         }
@@ -162,6 +169,14 @@ class StreamDestination implements DestinationInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function count()
+    {
+        return count($this->getIterator());
+    }
+
+    /**
      * Load backups from destination.
      *
      * @return BackupInterface[]
@@ -175,15 +190,7 @@ class StreamDestination implements DestinationInterface
          */
         foreach (Finder::create()->in($this->directory)->depth(0)->directories()->sortByModifiedTime() as $backupDirectory) {
 
-            $backup = new Backup($backupDirectory->getBasename(), array(), 0, $backupDirectory->getCTime(), $backupDirectory->getMTime());
-
-            /**
-             * @var \SplFileInfo $backupFile
-             */
-            foreach (Finder::create()->in($backupDirectory->getPathname())->files() as $backupFile) {
-
-                $backup->addFile(File::fromSplFileInfo($backupFile, $backupDirectory->getPathname()));
-            }
+            $backup = new Backup($backupDirectory->getBasename(), $this->getFiles($backupDirectory->getPathname()), 0, $backupDirectory->getCTime(), $backupDirectory->getMTime());
 
             $this->backups[$backup->getName()] = $backup;
         }
@@ -210,10 +217,20 @@ class StreamDestination implements DestinationInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Get all files in path.
+     *
+     * @param string $path Path to
+     * @return File[] List of files in given location
      */
-    public function count()
+    protected function getFiles($path)
     {
-        return count($this->getIterator());
+        $result = array();
+
+        foreach (Finder::create()->in($path)->files() as $file) {
+            $file = File::fromSplFileInfo($file, $path);
+            $result[$file->getRelativePath()] = $file;
+        }
+
+        return $result;
     }
 }

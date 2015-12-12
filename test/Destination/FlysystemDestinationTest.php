@@ -12,23 +12,23 @@
  */
 namespace RunOpenCode\Backup\Tests\Destination;
 
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Filesystem;
 use RunOpenCode\Backup\Backup\Backup;
 use RunOpenCode\Backup\Backup\File;
-use RunOpenCode\Backup\Destination\StreamDestination;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
+use RunOpenCode\Backup\Destination\FlysystemDestination;
 
-class StreamDestinationTest extends BaseStreamDestinationTest
+class FlysystemDestinationTest extends BaseStreamDestinationTest
 {
     /**
-     * @var StreamDestination
+     * @var FlysystemDestination
      */
     protected $destination;
 
     public function setUp()
     {
         parent::setUp();
-        $this->destination = new StreamDestination($this->directory, $this->filesystem);
+        $this->destination = new FlysystemDestination(new Filesystem(new Local($this->directory)));
     }
 
     /**
@@ -42,7 +42,7 @@ class StreamDestinationTest extends BaseStreamDestinationTest
 
         $this->destination->push(new Backup('test_backup', $files));
 
-        $cleanDestination = new StreamDestination($this->directory, $this->filesystem);
+        $cleanDestination = new FlysystemDestination(new Filesystem(new Local($this->directory)));
 
         $this->assertTrue($cleanDestination->has('test_backup'), 'Destination has a backup.');
         $this->assertEquals(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Destination has same number of files as source.');
@@ -78,13 +78,13 @@ class StreamDestinationTest extends BaseStreamDestinationTest
             File::fromLocal($tmpFile)
         )));
 
-        $cleanDestination = new StreamDestination($this->directory, $this->filesystem);
+        $cleanDestination = new FlysystemDestination(new Filesystem(new Local($this->directory)));
         $this->assertTrue($cleanDestination->has('test_backup'), 'Destination has a backup.');
         $this->assertEquals(2, count($cleanDestination->get('test_backup')->getFiles()), 'Destination has same number of files as source.');
 
         $this->destination->push(new Backup('test_backup', $files));
 
-        $cleanDestination = new StreamDestination($this->directory, $this->filesystem);
+        $cleanDestination = new FlysystemDestination(new Filesystem(new Local($this->directory)));
         $this->assertTrue($cleanDestination->has('test_backup'), 'Destination has same backup.');
         $this->assertEquals(1, $cleanDestination->count(), 'Destination has only one backup.');
         $this->assertEquals(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Destination has 2 new files of source, one old, one file is removed.');
