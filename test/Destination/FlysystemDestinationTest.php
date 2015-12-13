@@ -49,13 +49,11 @@ class FlysystemDestinationTest extends BaseStreamDestinationTest
 
         $this->assertSame(array_map(function($file) {
             return array(
-                'name' => $file->getName(),
                 'relative_path' => $file->getRelativePath(),
                 'size' => $file->getSize()
             );
         }, $files), array_map(function($file) {
             return array(
-                'name' => $file->getName(),
                 'relative_path' => $file->getRelativePath(),
                 'size' => $file->getSize()
             );
@@ -89,7 +87,7 @@ class FlysystemDestinationTest extends BaseStreamDestinationTest
         $this->assertEquals(1, $cleanDestination->count(), 'Destination has only one backup.');
         $this->assertEquals(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Destination has 2 new files of source, one old, one file is removed.');
         $this->assertFalse(in_array(basename($tmpFile), array_map(function($item) {
-            return $item->getName();
+            return $item->getRelativePath();
         }, $cleanDestination->get('test_backup')->getFiles())), 'Removed file is file created in tmp dir.');
 
     }

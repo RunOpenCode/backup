@@ -36,7 +36,7 @@ class SourceCollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertArraySubset(
             array('file1.txt', 'file2.txt', 'file3.txt', 'file4.txt', 'file5.txt', 'file6.txt'),
             array_map(function(FileInterface $file) {
-                return $file->getName();
+                return $file->getRelativePath();
             }, $files),
             false,
             'Has to have 6 specific files.'

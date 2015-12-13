@@ -26,11 +26,6 @@ final class File implements FileInterface
     /**
      * @var string
      */
-    private $name;
-
-    /**
-     * @var string
-     */
     private $path;
 
     /**
@@ -58,23 +53,14 @@ final class File implements FileInterface
      */
     private $modifiedAt;
 
-    public function __construct($name, $path, $rootPath, $size, $createdAt, $modifiedAt)
+    public function __construct($path, $rootPath, $size, $createdAt, $modifiedAt)
     {
-        $this->name = $name;
         $this->path = $path;
         $this->rootPath = rtrim(is_null($rootPath) ? '' : $rootPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         $this->size = $size;
         $this->createdAt = (is_numeric($createdAt)) ? date_timestamp_set(new \DateTime(), $createdAt) : clone $createdAt;
         $this->modifiedAt = (is_numeric($modifiedAt)) ? date_timestamp_set(new \DateTime(), $modifiedAt) : clone $modifiedAt;
         $this->relativePath = null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getName()
-    {
-        return $this->name;
     }
 
     /**
@@ -141,13 +127,11 @@ final class File implements FileInterface
      *
      * @param string $path Path to file.
      * @param null|string $rootPath Root path of file.
-     * @param null|string $name Filename to use instead of original one (if provided).
      * @return File Created backup file instance.
      */
-    public static function fromLocal($path, $rootPath = null, $name = null)
+    public static function fromLocal($path, $rootPath = null)
     {
         return new static(
-            is_null($name) ? basename($path) : $name,
             $path,
             $rootPath,
             filesize($path),
@@ -161,18 +145,34 @@ final class File implements FileInterface
      *
      * @param \SplFileInfo $file
      * @param null|string $rootPath Root path of file.
-     * @param null|string $name Filename to use instead of original one (if provided).
-     * @return static
+     * @return File
      */
-    public static function fromSplFileInfo(\SplFileInfo $file, $rootPath = null, $name = null)
+    public static function fromSplFileInfo(\SplFileInfo $file, $rootPath = null)
     {
         return new static(
-            is_null($name) ? $file->getFilename() : $name,
             $file->getPathname(),
             $rootPath,
             $file->getSize(),
             $file->getCTime(),
             $file->getMTime()
+        );
+    }
+
+    /**
+     * Create file instance from Flysystem file metadata.
+     *
+     * @param array $metadata Flysystem file metadata.
+     * @param null|string $rootPath Root path of file.
+     * @return File
+     */
+    public static function fromFlysystemMetadata(array $metadata, $rootPath = null)
+    {
+        return new static(
+            $metadata['path'],
+            $rootPath,
+            $metadata['size'],
+            $metadata['timestamp'],
+            $metadata['timestamp']
         );
     }
 }

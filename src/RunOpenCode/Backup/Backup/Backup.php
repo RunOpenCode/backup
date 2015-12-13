@@ -15,6 +15,7 @@ namespace RunOpenCode\Backup\Backup;
 
 use RunOpenCode\Backup\Contract\FileInterface;
 use RunOpenCode\Backup\Contract\BackupInterface;
+use RunOpenCode\Backup\Utils\Filename;
 
 /**
  * Class Backup.
@@ -50,7 +51,7 @@ final class Backup implements BackupInterface
 
     public function __construct($name, array $files = array(), $size = 0, $createdAt = null, $modifiedAt = null)
     {
-        $this->name = $name;
+        $this->name = Filename::sanitize($name);
         $this->size = $size;
         $this->createdAt = is_null($createdAt) ? new \DateTime('now') : $createdAt;
         $this->modifiedAt = is_null($modifiedAt) ? new \DateTime('now') : $modifiedAt;
@@ -73,7 +74,7 @@ final class Backup implements BackupInterface
      */
     public function setName($name)
     {
-        $this->name = $name;
+        $this->name = Filename::sanitize($name);
 
         return $this;
     }

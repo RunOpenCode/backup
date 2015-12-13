@@ -15,7 +15,7 @@ namespace RunOpenCode\Backup\Tests\Destination;
 use Psr\Log\NullLogger;
 use RunOpenCode\Backup\Backup\Backup;
 use RunOpenCode\Backup\Destination\ReplicatedDestination;
-use RunOpenCode\Backup\Destination\StreamDestination;
+use RunOpenCode\Backup\Destination\LocalDestination;
 use RunOpenCode\Backup\Exception\DestinationException;
 
 class ReplicatedDestinationTest extends BaseStreamDestinationTest
@@ -27,8 +27,8 @@ class ReplicatedDestinationTest extends BaseStreamDestinationTest
     {
         $this->clearDestination();
 
-        $master = new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
-        $slave = new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination2');
+        $master = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
+        $slave = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination2');
 
         $replica = new ReplicatedDestination($master, $slave);
 
@@ -40,7 +40,7 @@ class ReplicatedDestinationTest extends BaseStreamDestinationTest
                      $this->directory . DIRECTORY_SEPARATOR . 'destination1',
                      $this->directory . DIRECTORY_SEPARATOR . 'destination2'
                  ) as $directory) {
-            $cleanDestination = new StreamDestination($directory);
+            $cleanDestination = new LocalDestination($directory);
 
             $this->assertTrue($cleanDestination->has('test_backup'), 'Each destination has backup.');
             $this->assertSame(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Each backup has same files.');
@@ -54,7 +54,7 @@ class ReplicatedDestinationTest extends BaseStreamDestinationTest
     {
         $this->clearDestination();
 
-        $master = new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
+        $master = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
 
         $slave = $this->getMockBuilder('RunOpenCode\\Backup\\Contract\\DestinationInterface')->getMock();
         $slave->method('push')->willThrowException(new DestinationException());
@@ -65,7 +65,7 @@ class ReplicatedDestinationTest extends BaseStreamDestinationTest
 
         $replica->push(new Backup('test_backup', $files));
 
-        $cleanDestination = new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
+        $cleanDestination = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
         $this->assertTrue($cleanDestination->has('test_backup'), 'Master has backup.');
         $this->assertSame(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Master has same files.');
 
@@ -80,7 +80,7 @@ class ReplicatedDestinationTest extends BaseStreamDestinationTest
     {
         $this->clearDestination();
 
-        $master = new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
+        $master = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
 
         $slave = $this->getMockBuilder('RunOpenCode\\Backup\\Contract\\DestinationInterface')->getMock();
         $slave->method('push')->willThrowException(new DestinationException());

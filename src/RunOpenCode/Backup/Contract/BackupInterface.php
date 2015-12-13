@@ -22,7 +22,7 @@ namespace RunOpenCode\Backup\Contract;
 interface BackupInterface
 {
     /**
-     * Get backup name.
+     * Get sanitized backup name.
      *
      * @return string
      */

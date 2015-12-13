@@ -14,7 +14,7 @@ namespace RunOpenCode\Backup\Tests\Destination;
 
 use RunOpenCode\Backup\Backup\Backup;
 use RunOpenCode\Backup\Destination\DestinationCollection;
-use RunOpenCode\Backup\Destination\StreamDestination;
+use RunOpenCode\Backup\Destination\LocalDestination;
 use RunOpenCode\Backup\Exception\DestinationException;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -27,8 +27,8 @@ class DestinationCollectionTest extends BaseStreamDestinationTest
     {
         $this->clearDestination();
 
-        $destination1 = new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
-        $destination2 = new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination2');
+        $destination1 = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
+        $destination2 = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination2');
 
         $theCollection = new DestinationCollection();
 
@@ -44,7 +44,7 @@ class DestinationCollectionTest extends BaseStreamDestinationTest
                      $this->directory . DIRECTORY_SEPARATOR . 'destination1',
                      $this->directory . DIRECTORY_SEPARATOR . 'destination2'
                  ) as $directory) {
-            $cleanDestination = new StreamDestination($directory);
+            $cleanDestination = new LocalDestination($directory);
 
             $this->assertTrue($cleanDestination->has('test_backup'), 'Each destination has backup.');
             $this->assertSame(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Each backup has same files.');
@@ -64,7 +64,7 @@ class DestinationCollectionTest extends BaseStreamDestinationTest
         $stub->method('push')->willThrowException(new DestinationException());
 
         $theCollection = new DestinationCollection(array(
-            new StreamDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1'),
+            new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1'),
             $stub
         ));
 

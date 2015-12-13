@@ -18,6 +18,7 @@ use RunOpenCode\Backup\Contract\SourceInterface;
 use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\SourceException;
+use RunOpenCode\Backup\Utils\Filename;
 use Symfony\Component\Process\ProcessBuilder;
 
 /**
@@ -70,6 +71,37 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
      */
     public function fetch()
     {
+        $process = $this->buildProcess();
+
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new SourceException(sprintf('Unable to dump MySql database "%s", reason: "%s".', $this->database, $process->getErrorOutput()));
+        }
+
+        $mySqlDump = Filename::temporaryFile(sprintf('mysql-dump-%s-%s-%s.sql', $this->database, (is_null($this->host) ? 'localhost' : $this->host), date('Y-m-d-H-i-s')));
+
+        if (file_put_contents($mySqlDump, $process->getOutput()) === false) {
+
+            throw new \RuntimeException(sprintf('Unable to save MySql dump of database into "%s".', $mySqlDump));
+
+        } else {
+
+            $this->getEventDispatcher()->addListener(BackupEvents::TERMINATE, function() use ($mySqlDump) {
+                unlink($mySqlDump);
+            });
+
+            return array(File::fromLocal($mySqlDump, dirname($mySqlDump)));
+        }
+    }
+
+    /**
+     * Builds mysqldump process.
+     *
+     * @return \Symfony\Component\Process\Process
+     */
+    protected function buildProcess()
+    {
         $processBuilder = new ProcessBuilder();
 
         $processBuilder
@@ -91,27 +123,6 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
 
         $processBuilder->add($this->database);
 
-        $process = $processBuilder->getProcess();
-
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new SourceException(sprintf('Unable to dump MySql database "%s", reason: "%s".', $this->database, $process->getErrorOutput()));
-        }
-
-        $tmpFile = tempnam(sys_get_temp_dir(), preg_replace('/[^a-zA-Z0-9-_\.]/','', sprintf('mysql-dump-%s-%s', $this->database, $this->host)));
-
-        if (file_put_contents($tmpFile, $process->getOutput()) === false) {
-
-            throw new \RuntimeException(sprintf('Unable to save MySql dump of database into "%s".', $tmpFile));
-
-        } else {
-
-            $this->getEventDispatcher()->addListener(BackupEvents::TERMINATE, function() use ($tmpFile) {
-                unlink($tmpFile);
-            });
-
-            return array(File::fromLocal($tmpFile, dirname($tmpFile), sprintf('mysql-dump-%s-%s-%s.sql', $this->database, $this->host, date('Y-m-d-H-i-s'))));
-        }
+        return $processBuilder->getProcess();
     }
 }

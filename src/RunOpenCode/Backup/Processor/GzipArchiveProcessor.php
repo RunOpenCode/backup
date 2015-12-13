@@ -19,6 +19,7 @@ use RunOpenCode\Backup\Contract\ProcessorInterface;
 use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\ProcessorException;
+use RunOpenCode\Backup\Utils\Filename;
 use Symfony\Component\Process\ProcessBuilder;
 
 /**
@@ -54,7 +55,7 @@ class GzipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareIn
      */
     public function process(array $files)
     {
-        $tmpFile = tempnam(sys_get_temp_dir(), 'gzip-archive-processor');
+        $tmpFile = Filename::temporaryFilename($this->filename);
 
         $processBuilder = new ProcessBuilder();
 
@@ -85,6 +86,6 @@ class GzipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareIn
             unlink($tmpFile);
         });
 
-        return array(File::fromLocal($tmpFile, dirname($tmpFile), $this->filename));
+        return array(File::fromLocal($tmpFile, dirname($tmpFile)));
     }
 }

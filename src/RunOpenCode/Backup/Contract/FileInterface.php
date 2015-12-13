@@ -22,13 +22,6 @@ namespace RunOpenCode\Backup\Contract;
 interface FileInterface
 {
     /**
-     * Get file name.
-     *
-     * @return string
-     */
-    public function getName();
-
-    /**
      * Get file path.
      *
      * @return string

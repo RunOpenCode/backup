@@ -30,19 +30,10 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
         $this->assertArraySubset(
             array('file1.txt', 'file2.txt', 'file3.txt'),
             array_map(function(FileInterface $file) {
-                return $file->getName();
-            }, $files),
-            false,
-            'Has to have 3 specific files.'
-        );
-
-        $this->assertArraySubset(
-            array('file1.txt', 'file2.txt', 'file3.txt'),
-            array_map(function(FileInterface $file) {
                 return $file->getRelativePath();
             }, $files),
             false,
-            'Relative path must be filename since glob is root path.'
+            'Has to have 3 specific files.'
         );
     }
 
@@ -59,21 +50,12 @@ class GlobSourceTest extends \PHPUnit_Framework_TestCase
         $files = $source->fetch();
 
         $this->assertArraySubset(
-            array('file1.txt', 'file2.txt', 'file3.txt', 'file4.txt', 'file5.txt', 'file6.txt'),
-            array_map(function(FileInterface $file) {
-                return $file->getName();
-            }, $files),
-            false,
-            'Has to have 6 specific files.'
-        );
-
-        $this->assertArraySubset(
             array('globSet1/file1.txt', 'globSet1/file2.txt', 'globSet1/file3.txt', 'globSet2/file4.txt', 'globSet2/file5.txt', 'globSet2/file6.txt'),
             array_map(function(FileInterface $file) {
                 return $file->getRelativePath();
             }, $files),
             false,
-            'Relative path must be as defined since glob root path is given.'
+            'Has to have 6 specific files.'
         );
     }
 

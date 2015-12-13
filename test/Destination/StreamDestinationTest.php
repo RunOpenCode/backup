@@ -14,21 +14,21 @@ namespace RunOpenCode\Backup\Tests\Destination;
 
 use RunOpenCode\Backup\Backup\Backup;
 use RunOpenCode\Backup\Backup\File;
-use RunOpenCode\Backup\Destination\StreamDestination;
+use RunOpenCode\Backup\Destination\LocalDestination;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
 class StreamDestinationTest extends BaseStreamDestinationTest
 {
     /**
-     * @var StreamDestination
+     * @var LocalDestination
      */
     protected $destination;
 
     public function setUp()
     {
         parent::setUp();
-        $this->destination = new StreamDestination($this->directory, $this->filesystem);
+        $this->destination = new LocalDestination($this->directory, $this->filesystem);
     }
 
     /**
@@ -42,20 +42,18 @@ class StreamDestinationTest extends BaseStreamDestinationTest
 
         $this->destination->push(new Backup('test_backup', $files));
 
-        $cleanDestination = new StreamDestination($this->directory, $this->filesystem);
+        $cleanDestination = new LocalDestination($this->directory, $this->filesystem);
 
         $this->assertTrue($cleanDestination->has('test_backup'), 'Destination has a backup.');
         $this->assertEquals(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Destination has same number of files as source.');
 
         $this->assertSame(array_map(function($file) {
             return array(
-                'name' => $file->getName(),
                 'relative_path' => $file->getRelativePath(),
                 'size' => $file->getSize()
             );
         }, $files), array_map(function($file) {
             return array(
-                'name' => $file->getName(),
                 'relative_path' => $file->getRelativePath(),
                 'size' => $file->getSize()
             );
@@ -78,18 +76,18 @@ class StreamDestinationTest extends BaseStreamDestinationTest
             File::fromLocal($tmpFile)
         )));
 
-        $cleanDestination = new StreamDestination($this->directory, $this->filesystem);
+        $cleanDestination = new LocalDestination($this->directory, $this->filesystem);
         $this->assertTrue($cleanDestination->has('test_backup'), 'Destination has a backup.');
         $this->assertEquals(2, count($cleanDestination->get('test_backup')->getFiles()), 'Destination has same number of files as source.');
 
         $this->destination->push(new Backup('test_backup', $files));
 
-        $cleanDestination = new StreamDestination($this->directory, $this->filesystem);
+        $cleanDestination = new LocalDestination($this->directory, $this->filesystem);
         $this->assertTrue($cleanDestination->has('test_backup'), 'Destination has same backup.');
         $this->assertEquals(1, $cleanDestination->count(), 'Destination has only one backup.');
         $this->assertEquals(count($files), count($cleanDestination->get('test_backup')->getFiles()), 'Destination has 2 new files of source, one old, one file is removed.');
         $this->assertFalse(in_array(basename($tmpFile), array_map(function($item) {
-            return $item->getName();
+            return $item->getRelativePath();
         }, $cleanDestination->get('test_backup')->getFiles())), 'Removed file is file created in tmp dir.');
 
     }
