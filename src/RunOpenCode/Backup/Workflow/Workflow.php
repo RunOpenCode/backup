@@ -18,6 +18,7 @@ use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
 use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
 use RunOpenCode\Backup\Contract\WorkflowActivityInterface;
+use RunOpenCode\Backup\Contract\WorkflowInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
 use RunOpenCode\Backup\Event\BackupEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -29,17 +30,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *
  * @package RunOpenCode\Backup\Workflow
  */
-class Workflow
+class Workflow implements WorkflowInterface
 {
     /**
-     * @var array
+     * @var WorkflowActivityInterface[]
      */
     private $activities;
-
-    /**
-     * @var ProfileInterface
-     */
-    private $profile;
 
     /**
      * @var EventDispatcherInterface
@@ -51,20 +47,19 @@ class Workflow
      */
     private $logger;
 
-    public function __construct(ProfileInterface $profile, EventDispatcherInterface $eventDispatcher, LoggerInterface $logger, array $activities = array())
+    public function __construct(EventDispatcherInterface $eventDispatcher, LoggerInterface $logger, array $activities)
     {
-        $this->profile = $profile;
         $this->eventDispatcher = $eventDispatcher;
         $this->logger = $logger;
-        $this->activities = count($activities) ? $activities : array(new Fetch(), new Process(), new Name(), new PreRotate(), new Push(), new PostRotate());
+        $this->activities = $activities;
     }
 
-    public function execute()
+    public function execute(ProfileInterface $profile)
     {
-        $backup = new Backup($this->profile->getName());
+        $backup = new Backup($profile->getName());
 
-        $this->logger->info(sprintf('About to execute backup for profile: "%s".', $this->profile->getName()));
-        $this->eventDispatcher->dispatch(BackupEvents::BEGIN, new BackupEvent($this, $this->profile, $backup));
+        $this->logger->info(sprintf('About to execute backup for profile: "%s".', $profile->getName()));
+        $this->eventDispatcher->dispatch(BackupEvents::BEGIN, new BackupEvent($this, $profile, $backup));
 
         /**
          * @var WorkflowActivityInterface $activity
@@ -73,7 +68,7 @@ class Workflow
 
             $activity
                 ->setBackup($backup)
-                ->setProfile($this->profile);
+                ->setProfile($profile);
 
             /**
              * @var LoggerAwareInterface $activity
@@ -97,7 +92,7 @@ class Workflow
 
             } catch (\Exception $e) {
 
-                $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $this->profile, $backup, $activity));
+                $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $profile, $backup, $activity));
 
                 throw $e;
             }

@@ -32,7 +32,7 @@ trait LoggerAwareTrait
      * Set logger.
      *
      * @param LoggerInterface $logger
-     * @return $this;
+     * @return LoggerInterface $this Fluent interface.;
      */
     public function setLogger(LoggerInterface $logger)
     {

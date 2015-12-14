@@ -26,10 +26,13 @@ use RunOpenCode\Backup\Utils\Filesize;
 final class MaxSizeRotator implements RotatorInterface
 {
     /**
-     * @var integer
+     * @var int
      */
     private $maxSize;
 
+    /**
+     * @param string|int $maxSize
+     */
     public function __construct($maxSize)
     {
         if (is_numeric($maxSize)) {

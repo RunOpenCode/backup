@@ -24,64 +24,82 @@ class FlysystemDestination extends BaseDestination
     /**
      * {@inheritdoc}
      */
-    protected function getDirectoryForBackup(BackupInterface $backup)
+    public function delete($name)
     {
-        if (!$this->flysystem->has($backup->getName())) {
-
-            if (!$this->flysystem->createDir($backup->getName())) {
-                throw new DestinationException(sprintf('Unable to create backup directory "%s" in flysystem destination.', $backup->getName()));
-            }
+        try {
+            $this->flysystem->deleteDir($name);
+        } catch (\Exception $e) {
+            throw new DestinationException(sprintf('Unable to remove backup "%s" from flysystem destination.', $name), 0, $e);
         }
 
-        return $backup->getName();
+        if (!is_null($this->backups)) {
+            unset($this->backups[$name]);
+        }
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function getFiles($path)
+    public function push(BackupInterface $backup)
     {
-        $result = array();
+        $backupDirectory = $backup->getName();
+
+        if (!$this->flysystem->has($backupDirectory) && !$this->flysystem->createDir($backupDirectory)) {
+            throw new DestinationException(sprintf('Unable to create backup directory "%s" in flysystem destination.', $backupDirectory));
+        }
+
+        $removedBackupFiles = $this->getFiles($backupDirectory);
 
         /**
-         * @var \SplFileInfo $file
+         * @var FileInterface $backupFile
          */
-        foreach ($this->flysystem->listContents($path, true) as $file) {
+        foreach ($backup->getFiles() as $backupFile) {
 
-            if ($file['type'] == 'file') {
-                $file = File::fromFlysystemMetadata($file, $path);
-                $result[$file->getRelativePath()] = $file;
+            if (isset($removedBackupFiles[$backupFile->getRelativePath()])) {
+                unset($removedBackupFiles[$backupFile->getRelativePath()]);
             }
-        }
 
-        return $result;
-    }
+            $path = $backupDirectory . '/' . $backupFile->getRelativePath();
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function pushFile($backupDirectory, FileInterface $backupFile)
-    {
-        $path = $backupDirectory . '/' . $backupFile->getRelativePath();
+            try {
 
-        try {
+                if ($this->flysystem->has($path)) {
 
-            if ($this->flysystem->has($path)) {
+                    if ($backupFile->getModifiedAt() > new \DateTime('@' . $this->flysystem->getTimestamp($path))) {
+                        $resource = fopen($backupFile->getPath(), 'r');
+                        $this->flysystem->updateStream($path,  $resource);
+                        fclose($resource);
+                    }
 
-                if ($backupFile->getModifiedAt() > new \DateTime('@' . $this->flysystem->getTimestamp($path))) {
+                } else {
                     $resource = fopen($backupFile->getPath(), 'r');
-                    $this->flysystem->updateStream($path,  $resource);
+                    $this->flysystem->putStream($path,  $resource);
                     fclose($resource);
                 }
 
-            } else {
-                $resource = fopen($backupFile->getPath(), 'r');
-                $this->flysystem->putStream($path,  $resource);
-                fclose($resource);
+            } catch (\Exception $e) {
+                throw new DestinationException(sprintf('Unable to backup file "%s" to flysystem destination.', $backupFile->getPath()), 0, $e);
             }
+        }
 
-        } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to backup file "%s" to flysystem destination.', $backupFile->getPath()), 0, $e);
+        /**
+         * @var FileInterface $removedBackupFile
+         */
+        foreach ($removedBackupFiles as $removedBackupFile) {
+
+            $path = $backupDirectory . '/' . $removedBackupFile->getRelativePath();
+
+            try {
+                $this->flysystem->delete($path);
+            } catch (\Exception $e) {
+                throw new DestinationException(sprintf('Unable to cleanup backup destination "%s" after backup process, file "%s" could not be removed.', $backupDirectory, $path), 0, $e);
+            }
+        }
+
+        $this->removeEmptyDirectories($backupDirectory);
+
+        if (!empty($this->backups)) {
+            $this->backups[] = $backup;
         }
     }
 
@@ -109,27 +127,22 @@ class FlysystemDestination extends BaseDestination
     /**
      * {@inheritdoc}
      */
-    protected function doDelete($name)
+    protected function getFiles($path)
     {
-        try {
-            $this->flysystem->deleteDir($name);
-        } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to remove backup "%s" from flysystem destination.', $name), 0, $e);
-        }
-    }
+        $result = array();
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function removeFile($backupDirectory, FileInterface $backupFile)
-    {
-        $path = $backupDirectory . '/' . $backupFile->getRelativePath();
+        /**
+         * @var \SplFileInfo $file
+         */
+        foreach ($this->flysystem->listContents($path, true) as $file) {
 
-        try {
-            $this->flysystem->delete($path);
-        } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to cleanup backup destination "%s" after backup process, file "%s" could not be removed.', $backupDirectory, $path), 0, $e);
+            if ($file['type'] == 'file') {
+                $file = File::fromFlysystemMetadata($file, $path);
+                $result[$file->getRelativePath()] = $file;
+            }
         }
+
+        return $result;
     }
 
     /**

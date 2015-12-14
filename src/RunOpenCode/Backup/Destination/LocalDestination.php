@@ -58,7 +58,23 @@ class LocalDestination extends BaseDestination
     /**
      * {@inheritdoc}
      */
-    protected function getDirectoryForBackup(BackupInterface $backup)
+    public function delete($name)
+    {
+        try {
+            $this->filesystem->remove(sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $name));
+        } catch (\Exception $e) {
+            throw new DestinationException(sprintf('Unable to remove backup "%s" from stream destination "%s".', $name, $this->directory), 0, $e);
+        }
+
+        if (!is_null($this->backups)) {
+            unset($this->backups[$name]);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function push(BackupInterface $backup)
     {
         $backupDirectory = $this->directory . DIRECTORY_SEPARATOR . $backup->getName();
 
@@ -68,8 +84,45 @@ class LocalDestination extends BaseDestination
             throw new DestinationException(sprintf('Unable to create backup directory "%s" for backup "%s" in local destination.', $backupDirectory, $backup->getName()));
         }
 
-        return $backupDirectory;
+        $removedBackupFiles = $this->getFiles($backupDirectory);
+
+        /**
+         * @var FileInterface $backupFile
+         */
+        foreach ($backup->getFiles() as $backupFile) {
+
+            if (isset($removedBackupFiles[$backupFile->getRelativePath()])) {
+                unset($removedBackupFiles[$backupFile->getRelativePath()]);
+            }
+
+            try {
+                $this->filesystem->copy($backupFile->getPath(), sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
+            } catch (\Exception $e) {
+                throw new DestinationException(sprintf('Unable to backup file "%s" to destination "%s".', $backupFile->getPath(), $this->directory), 0, $e);
+            }
+        }
+
+        /**
+         * @var FileInterface $removedBackupFile
+         */
+        foreach ($removedBackupFiles as $removedBackupFile) {
+
+            $path = $backupDirectory . DIRECTORY_SEPARATOR . $removedBackupFile->getRelativePath();
+
+            try {
+                $this->filesystem->remove($path);
+            } catch (\Exception $e) {
+                throw new DestinationException(sprintf('Unable to cleanup backup destination "%s" after backup process, file "%s" could not be removed.', $backupDirectory, $path), 0, $e);
+            }
+        }
+
+        $this->removeEmptyDirectories($backupDirectory);
+
+        if (!empty($this->backups)) {
+            $this->backups[] = $backup;
+        }
     }
+
 
     /**
      * {@inheritdoc}
@@ -89,18 +142,6 @@ class LocalDestination extends BaseDestination
     /**
      * {@inheritdoc}
      */
-    protected function pushFile($backupDirectory, FileInterface $backupFile)
-    {
-        try {
-            $this->filesystem->copy($backupFile->getPath(), sprintf('%s%s%s', $backupDirectory, DIRECTORY_SEPARATOR, $backupFile->getRelativePath()));
-        } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to backup file "%s" to destination "%s".', $backupFile->getPath(), $this->directory), 0, $e);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     protected function load()
     {
         $this->backups = array();
@@ -113,32 +154,6 @@ class LocalDestination extends BaseDestination
             $backup = new Backup($backupDirectory->getBasename(), $this->getFiles($backupDirectory->getPathname()), 0, $backupDirectory->getCTime(), $backupDirectory->getMTime());
 
             $this->backups[$backup->getName()] = $backup;
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doDelete($name)
-    {
-        try {
-            $this->filesystem->remove(sprintf('%s%s%s', rtrim($this->directory, DIRECTORY_SEPARATOR), DIRECTORY_SEPARATOR, $name));
-        } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to remove backup "%s" from stream destination "%s".', $name, $this->directory), 0, $e);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function removeFile($backupDirectory, FileInterface $backupFile)
-    {
-        $path = $backupDirectory . DIRECTORY_SEPARATOR . $backupFile->getRelativePath();
-
-        try {
-            $this->filesystem->remove($path);
-        } catch (\Exception $e) {
-            throw new DestinationException(sprintf('Unable to cleanup backup destination "%s" after backup process, file "%s" could not be removed.', $backupDirectory, $path), 0, $e);
         }
     }
 

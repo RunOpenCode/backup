@@ -61,7 +61,7 @@ final class Filesize
                 $numberPart = str_replace($unit, '', $size);
 
                 if (is_numeric($numberPart) && $numberPart > 0) {
-                    return $bytes * $numberPart;
+                    return intval($bytes * $numberPart);
                 } else {
                     throw new \InvalidArgumentException(sprintf('Invalid size format: "%s"', $numberPart));
                 }

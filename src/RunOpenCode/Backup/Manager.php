@@ -20,7 +20,6 @@ use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\EmptySourceException;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
-use RunOpenCode\Backup\Workflow\Workflow;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -93,11 +92,9 @@ final class Manager implements ManagerInterface
 
         $profile = $this->get($name);
 
-        $workflow = new Workflow($profile, $this->eventDispatcher, $this->logger);
-
         try {
 
-            $workflow->execute();
+            $profile->getWorkflow()->execute($profile);
 
         } catch (EmptySourceException $e) {
 

@@ -18,6 +18,7 @@ use RunOpenCode\Backup\Contract\ProcessorInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
 use RunOpenCode\Backup\Contract\RotatorInterface;
 use RunOpenCode\Backup\Contract\SourceInterface;
+use RunOpenCode\Backup\Contract\WorkflowInterface;
 
 /**
  * Class Profile
@@ -63,6 +64,8 @@ final class Profile implements ProfileInterface
      */
     private $postRotator;
 
+    private $workflow;
+
     public function __construct(
         $name,
         SourceInterface $source,
@@ -70,7 +73,8 @@ final class Profile implements ProfileInterface
         NamerInterface $namer,
         RotatorInterface $preRotator,
         DestinationInterface $destination,
-        RotatorInterface $postRotator
+        RotatorInterface $postRotator,
+        WorkflowInterface $workflow
     ) {
         $this->name = $name;
         $this->source = $source;
@@ -79,10 +83,11 @@ final class Profile implements ProfileInterface
         $this->preRotator = $preRotator;
         $this->destination = $destination;
         $this->postRotator = $postRotator;
+        $this->workflow = $workflow;
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getName()
     {
@@ -90,7 +95,7 @@ final class Profile implements ProfileInterface
     }
 
     /**
-     * @return SourceInterface
+     * {@inheritdoc}
      */
     public function getSource()
     {
@@ -98,7 +103,7 @@ final class Profile implements ProfileInterface
     }
 
     /**
-     * @return ProcessorInterface
+     * {@inheritdoc}
      */
     public function getProcessor()
     {
@@ -106,7 +111,7 @@ final class Profile implements ProfileInterface
     }
 
     /**
-     * @return NamerInterface
+     * {@inheritdoc}
      */
     public function getNamer()
     {
@@ -114,7 +119,7 @@ final class Profile implements ProfileInterface
     }
 
     /**
-     * @return RotatorInterface
+     * {@inheritdoc}
      */
     public function getPreRotator()
     {
@@ -122,7 +127,7 @@ final class Profile implements ProfileInterface
     }
 
     /**
-     * @return DestinationInterface
+     * {@inheritdoc}
      */
     public function getDestination()
     {
@@ -130,10 +135,18 @@ final class Profile implements ProfileInterface
     }
 
     /**
-     * @return RotatorInterface
+     * {@inheritdoc}
      */
     public function getPostRotator()
     {
         return $this->postRotator;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getWorkflow()
+    {
+        return $this->workflow;
     }
 }

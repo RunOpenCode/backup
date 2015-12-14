@@ -12,22 +12,19 @@
  */
 namespace RunOpenCode\Backup\Contract;
 
-use RunOpenCode\Backup\Exception\SourceException;
-
 /**
- * Interface SourceInterface
+ * Interface WorkflowInterface
  *
- * Represents abstract source (filesystem, database, etc.) of resources which ought to be backed up.
+ * Workflow is entry point of backup workflow that executes workflow activities in given sequence.
  *
- * @package RunOpenCode\Backup\Contract
+ * @package RunOpenCode\Backup\Workflow
  */
-interface SourceInterface
+interface WorkflowInterface
 {
     /**
-     * Fetch source for backup process.
+     * Execute backup profile in defined workflow.
      *
-     * @return FileInterface[] Returns list of backup files for backup.
-     * @throws SourceException
+     * @param ProfileInterface $profile Backup profile to execute.
      */
-    public function fetch();
+    public function execute(ProfileInterface $profile);
 }

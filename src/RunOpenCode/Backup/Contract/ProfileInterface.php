@@ -69,4 +69,11 @@ interface ProfileInterface
      * @return RotatorInterface
      */
     public function getPostRotator();
+
+    /**
+     * Get workflow for this profile.
+     *
+     * @return WorkflowInterface
+     */
+    public function getWorkflow();
 }
