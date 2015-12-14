@@ -16,7 +16,7 @@ use RunOpenCode\Backup\Source\GlobSource;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
-abstract class BaseStreamDestinationTest extends \PHPUnit_Framework_TestCase
+abstract class BaseDestinationTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var string

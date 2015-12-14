@@ -12,17 +12,17 @@
  */
 namespace RunOpenCode\Backup\Tests\Destination;
 
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
-use RunOpenCode\Backup\Destination\FlysystemDestination;
+use RunOpenCode\Backup\Destination\LocalDestination;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
-class FlysystemDestinationTest extends BaseConcreteDestinationTest
+class LocalDestinationTest extends BaseConcreteDestinationTest
 {
     /**
      * {@inheritdoc}
      */
     protected function getDestination()
     {
-        return new FlysystemDestination(new Filesystem(new Local($this->directory)));
+        return new LocalDestination($this->directory, $this->filesystem);
     }
 }

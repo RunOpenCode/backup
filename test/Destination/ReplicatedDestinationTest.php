@@ -18,7 +18,7 @@ use RunOpenCode\Backup\Destination\ReplicatedDestination;
 use RunOpenCode\Backup\Destination\LocalDestination;
 use RunOpenCode\Backup\Exception\DestinationException;
 
-class ReplicatedDestinationTest extends BaseStreamDestinationTest
+class ReplicatedDestinationTest extends BaseDestinationTest
 {
     /**
      * @test

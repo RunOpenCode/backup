@@ -18,7 +18,7 @@ use RunOpenCode\Backup\Destination\LocalDestination;
 use RunOpenCode\Backup\Exception\DestinationException;
 use Symfony\Component\Filesystem\Filesystem;
 
-class DestinationCollectionTest extends BaseStreamDestinationTest
+class DestinationCollectionTest extends BaseDestinationTest
 {
     /**
      * @test
