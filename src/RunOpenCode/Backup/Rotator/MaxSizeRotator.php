@@ -36,7 +36,7 @@ final class MaxSizeRotator implements RotatorInterface
     public function __construct($maxSize)
     {
         if (is_numeric($maxSize)) {
-            $this->maxSize = $maxSize;
+            $this->maxSize = intval($maxSize);
         } else {
             $this->maxSize = Filesize::getBytes($maxSize);
         }
