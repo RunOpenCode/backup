@@ -38,23 +38,9 @@ class Fetch extends BaseActivity implements LoggerAwareInterface, EventDispatche
     public function execute()
     {
         try {
-            $files = $this->profile->getSource()->fetch();
 
-            if (count($files) > 0) {
-
-                throw new EmptySourceException('Nothing to backup.');
-
-            } else {
-
-                $this->backup->addFiles($files);
-                $this->getLogger()->info(sprintf('Source files successfully fetched, %s total files are scheduled for backup.', count($files)));
-                $this->getEventDispatcher()->dispatch(BackupEvents::FETCH, new BackupEvent($this, $this->profile, $this->backup, $this));
-
-            }
-
-        } catch (EmptySourceException $e) {
-
-            throw $e;
+            $this->backup->addFiles($this->profile->getSource()->fetch());
+            $this->getEventDispatcher()->dispatch(BackupEvents::FETCH, new BackupEvent($this, $this->profile, $this->backup, $this));
 
         } catch (\Exception $e) {
 
@@ -67,6 +53,16 @@ class Fetch extends BaseActivity implements LoggerAwareInterface, EventDispatche
             ));
 
             throw $e;
+        }
+
+        if (count($this->backup->getFiles()) == 0) {
+
+            throw new EmptySourceException('Nothing to backup.');
+
+        } else {
+
+            $this->getLogger()->info(sprintf('Source files successfully fetched, %s total files are scheduled for backup.', count($this->backup->getFiles())));
+
         }
     }
 }

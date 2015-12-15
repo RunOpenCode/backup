@@ -39,10 +39,7 @@ class Name extends BaseActivity implements LoggerAwareInterface, EventDispatcher
         try {
 
             $this->backup->setName($this->profile->getNamer()->getName());
-
-            $this->getLogger()->info('Naming successfully completed.');
             $this->getEventDispatcher()->dispatch(BackupEvents::NAME, new BackupEvent($this, $this->profile, $this->backup, $this));
-
 
         } catch (\Exception $e) {
 
@@ -56,5 +53,7 @@ class Name extends BaseActivity implements LoggerAwareInterface, EventDispatcher
 
             throw $e;
         }
+
+        $this->getLogger()->info(sprintf('Naming successfully completed, backup name: "%s".', $this->backup->getName()));
     }
 }
