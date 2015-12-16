@@ -43,7 +43,9 @@ class PreRotate extends BaseActivity implements LoggerAwareInterface, EventDispa
 
             $nominations = $this->profile->getPreRotator()->nominate($this->profile->getDestination()->all());
 
-            if ($count = count($nominations) > 0) {
+            $preRotateCount = $this->profile->getDestination()->count();
+
+            if (count($nominations) > 0) {
 
                 /**
                  * @var BackupInterface $nomination
@@ -54,8 +56,9 @@ class PreRotate extends BaseActivity implements LoggerAwareInterface, EventDispa
                 }
             }
 
-            $this->getLogger()->info(sprintf('Pre-rotation successfully executed, %s backups rotated.', $count));
             $this->getEventDispatcher()->dispatch(BackupEvents::PRE_ROTATE, new BackupEvent($this, $this->profile, $this->backup, $this));
+
+            $this->getLogger()->info(sprintf('Pre-rotation successfully executed, %s backups rotated.', ($preRotateCount - $this->profile->getDestination()->count())));
 
         } catch (\Exception $e) {
 

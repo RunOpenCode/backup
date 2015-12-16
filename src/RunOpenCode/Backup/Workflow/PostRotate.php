@@ -41,7 +41,9 @@ class PostRotate extends BaseActivity implements LoggerAwareInterface, EventDisp
 
             $nominations = $this->profile->getPostRotator()->nominate($this->profile->getDestination()->all());
 
-            if ($count = count($nominations) > 0) {
+            $preRotateCount = $this->profile->getDestination()->count();
+
+            if (count($nominations) > 0) {
 
                 /**
                  * @var BackupInterface $nomination
@@ -52,8 +54,9 @@ class PostRotate extends BaseActivity implements LoggerAwareInterface, EventDisp
                 }
             }
 
-            $this->getLogger()->info(sprintf('Post-rotation successfully executed, %s backups rotated.', $count));
             $this->getEventDispatcher()->dispatch(BackupEvents::POST_ROTATE, new BackupEvent($this, $this->profile, $this->backup, $this));
+
+            $this->getLogger()->info(sprintf('Post-rotation successfully executed, %s backups rotated.', ($preRotateCount - $this->profile->getDestination()->count())));
 
         } catch (\Exception $e) {
 

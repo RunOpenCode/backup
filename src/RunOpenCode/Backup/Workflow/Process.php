@@ -36,17 +36,13 @@ class Process extends BaseActivity implements LoggerAwareInterface, EventDispatc
      */
     public function execute()
     {
+        $files = $this->backup->getFiles();
+        $countIn = count($files);
+
         try {
 
-            $files = $this->backup->getFiles();
-            $countIn = count($files);
+            $this->backup->setFiles($this->profile->getProcessor()->process($files));
 
-            $files = $this->profile->getProcessor()->process($files);
-            $countOut = count($files);
-
-            $this->backup->setFiles($files);
-
-            $this->getLogger()->info(sprintf('Source files successfully processed, %s files in, %s out.', $countIn, $countOut));
             $this->getEventDispatcher()->dispatch(BackupEvents::PROCESS, new BackupEvent($this, $this->profile, $this->backup, $this));
 
 
@@ -62,5 +58,7 @@ class Process extends BaseActivity implements LoggerAwareInterface, EventDispatc
 
             throw $e;
         }
+
+        $this->getLogger()->info(sprintf('Source files successfully processed, %s files in, %s out.', $countIn, count($this->backup->getFiles())));
     }
 }

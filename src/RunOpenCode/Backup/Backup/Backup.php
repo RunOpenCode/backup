@@ -58,6 +58,8 @@ final class Backup implements BackupInterface
 
         if (count($files)) {
             $this->setFiles($files);
+        } else {
+            $this->files = array();
         }
     }
 
