@@ -15,8 +15,6 @@ namespace RunOpenCode\Backup;
 use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Contract\ManagerInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
-use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
-use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -28,29 +26,14 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 final class Manager implements ManagerInterface
 {
-    use LoggerAwareTrait;
-    use EventDispatcherAwareTrait;
-
     /**
      * @var ProfileInterface[]
      */
     private $profiles;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    public function __construct(EventDispatcherInterface $eventDispatcher = null, LoggerInterface $logger = null, $profiles = array())
+    public function __construct($profiles = array())
     {
         $this->profiles = $profiles;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->logger = $logger;
     }
 
     /**

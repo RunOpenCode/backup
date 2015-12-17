@@ -19,7 +19,7 @@ namespace RunOpenCode\Backup\Contract;
  *
  * @package RunOpenCode\Backup\Contract
  */
-interface ManagerInterface extends \IteratorAggregate, LoggerAwareInterface, EventDispatcherAwareInterface
+interface ManagerInterface extends \IteratorAggregate
 {
     /**
      * Add profile to profiles collection.
