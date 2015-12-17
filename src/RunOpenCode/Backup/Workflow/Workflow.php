@@ -66,6 +66,22 @@ class Workflow implements WorkflowInterface
         $this->logger->info(sprintf('About to execute backup for profile: "%s".', $profile->getName()));
         $this->eventDispatcher->dispatch(BackupEvents::BEGIN, new BackupEvent($this, $profile, $backup));
 
+        $terminate = function() use ($profile) {
+
+            try {
+
+                $this->eventDispatcher->dispatch(BackupEvents::TERMINATE, new BackupEvent($profile));
+                $this->logger->info(sprintf('Backup for profile "%s" successfully terminated.', $profile->getName()));
+
+            } catch (\Exception $e) {
+
+                $this->logger->alert(sprintf('Could not terminate backup process for profile "%s".', $profile->getName()));
+
+            }
+        };
+
+        \Closure::bind($terminate, $this);
+
         try {
 
             /**
@@ -75,9 +91,13 @@ class Workflow implements WorkflowInterface
                 $this->executeActivity($activity, $profile, $backup);
             }
 
+            $terminate();
+
         } catch (EmptySourceException $e) {
 
             $this->logger->info(sprintf('Backup for profile "%s" didn\'t yield any file for backup.', $profile->getName()));
+
+            $terminate();
 
         } catch (\Exception $e) {
 
@@ -90,19 +110,7 @@ class Workflow implements WorkflowInterface
                 'trace' => $e->getTrace()
             ));
 
-        } finally {
-
-            try {
-
-                $this->eventDispatcher->dispatch(BackupEvents::TERMINATE, new BackupEvent($profile));
-                $this->logger->info(sprintf('Backup for profile "%s" successfully terminated.', $profile->getName()));
-
-            } catch (\Exception $e) {
-
-                $this->logger->alert(sprintf('Could not terminate backup process for profile "%s".', $profile->getName()));
-
-            }
-
+            $terminate();
         }
     }
 
