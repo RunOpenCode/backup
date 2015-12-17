@@ -14,6 +14,7 @@ namespace RunOpenCode\Backup\Workflow;
 
 use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Backup\Backup;
+use RunOpenCode\Backup\Contract\BackupInterface;
 use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
 use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
@@ -21,6 +22,7 @@ use RunOpenCode\Backup\Contract\WorkflowActivityInterface;
 use RunOpenCode\Backup\Contract\WorkflowInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
 use RunOpenCode\Backup\Event\BackupEvents;
+use RunOpenCode\Backup\Exception\EmptySourceException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -54,6 +56,9 @@ class Workflow implements WorkflowInterface
         $this->activities = $activities;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function execute(ProfileInterface $profile)
     {
         $backup = new Backup($profile->getName());
@@ -61,41 +66,86 @@ class Workflow implements WorkflowInterface
         $this->logger->info(sprintf('About to execute backup for profile: "%s".', $profile->getName()));
         $this->eventDispatcher->dispatch(BackupEvents::BEGIN, new BackupEvent($this, $profile, $backup));
 
-        /**
-         * @var WorkflowActivityInterface $activity
-         */
-        foreach ($this->activities as $activity) {
-
-            $activity
-                ->setBackup($backup)
-                ->setProfile($profile);
+        try {
 
             /**
-             * @var LoggerAwareInterface $activity
+             * @var WorkflowActivityInterface $activity
              */
-            if ($activity instanceof LoggerAwareInterface) {
-                $activity->setLogger($this->logger);
+            foreach ($this->activities as $activity) {
+                $this->executeActivity($activity, $profile, $backup);
             }
 
-            /**
-             * @var EventDispatcherAwareInterface $activity
-             */
-            if ($activity instanceof EventDispatcherAwareInterface) {
-                $activity->setEventDispatcher($this->eventDispatcher);
-            }
+        } catch (EmptySourceException $e) {
+
+            $this->logger->info(sprintf('Backup for profile "%s" didn\'t yield any file for backup.', $profile->getName()));
+
+        } catch (\Exception $e) {
+
+            $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $profile));
+            $this->logger->critical(sprintf('There has been an error while executing backup profile "%s".', $profile->getName()), array(
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTrace()
+            ));
+
+        } finally {
 
             try {
-                /**
-                 * @var WorkflowActivityInterface $activity
-                 */
-                $activity->execute();
+
+                $this->eventDispatcher->dispatch(BackupEvents::TERMINATE, new BackupEvent($profile));
+                $this->logger->info(sprintf('Backup for profile "%s" successfully terminated.', $profile->getName()));
 
             } catch (\Exception $e) {
 
-                $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $profile, $backup, $activity));
+                $this->logger->alert(sprintf('Could not terminate backup process for profile "%s".', $profile->getName()));
 
-                throw $e;
             }
+
+        }
+    }
+
+    /**
+     * Execute workflow activity.
+     *
+     * @param WorkflowActivityInterface $activity Activity to execute.
+     * @param ProfileInterface $profile Profile for which activity is being executed.
+     * @param BackupInterface $backup Backup for which activity is being executed.
+     *
+     * @throws \Exception
+     */
+    protected function executeActivity(WorkflowActivityInterface $activity, ProfileInterface $profile, BackupInterface $backup)
+    {
+        $activity
+            ->setBackup($backup)
+            ->setProfile($profile);
+
+        /**
+         * @var LoggerAwareInterface $activity
+         */
+        if ($activity instanceof LoggerAwareInterface) {
+            $activity->setLogger($this->logger);
+        }
+
+        /**
+         * @var EventDispatcherAwareInterface $activity
+         */
+        if ($activity instanceof EventDispatcherAwareInterface) {
+            $activity->setEventDispatcher($this->eventDispatcher);
+        }
+
+        try {
+            /**
+             * @var WorkflowActivityInterface $activity
+             */
+            $activity->execute();
+
+        } catch (\Exception $e) {
+
+            $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $profile, $backup, $activity));
+
+            throw $e;
         }
     }
 }

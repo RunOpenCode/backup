@@ -15,10 +15,7 @@ namespace RunOpenCode\Backup;
 use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Contract\ManagerInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
-use RunOpenCode\Backup\Event\BackupEvent;
-use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
-use RunOpenCode\Backup\Exception\EmptySourceException;
 use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -90,41 +87,7 @@ final class Manager implements ManagerInterface
             throw new \RuntimeException(sprintf('Unknown profile: "%s".', $name));
         }
 
-        $profile = $this->get($name);
-
-        try {
-
-            $profile->getWorkflow()->execute($profile);
-
-        } catch (EmptySourceException $e) {
-
-            $this->logger->info(sprintf('Backup for profile "%s" didn\'t yield any file for backup.', $profile->getName()));
-
-        } catch (\Exception $e) {
-
-            $this->eventDispatcher->dispatch(BackupEvents::ERROR, new BackupEvent($this, $profile));
-            $this->logger->critical(sprintf('There has been an error while executing backup profile "%s".', $profile->getName()), array(
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTrace()
-            ));
-
-        } finally {
-
-            try {
-
-                $this->eventDispatcher->dispatch(BackupEvents::TERMINATE, new BackupEvent($profile));
-                $this->logger->info(sprintf('Backup for profile "%s" successfully terminated.', $profile->getName()));
-
-            } catch (\Exception $e) {
-
-                $this->logger->alert(sprintf('Could not terminate backup process for profile "%s".', $profile->getName()));
-
-            }
-
-        }
+        $this->get($name)->getWorkflow()->execute($this->get($name));
 
         return $this;
     }

@@ -40,8 +40,9 @@ class Push extends BaseActivity implements LoggerAwareInterface, EventDispatcher
 
             $this->profile->getDestination()->push($this->backup);
 
-            $this->getLogger()->info(sprintf('Backup "%s" successfully pushed to destination.', $this->backup->getName()));
             $this->getEventDispatcher()->dispatch(BackupEvents::PUSH, new BackupEvent($this, $this->profile, $this->backup, $this));
+
+            $this->getLogger()->info(sprintf('Backup "%s" successfully pushed to destination.', $this->backup->getName()));
 
         } catch (\Exception $e) {
 
