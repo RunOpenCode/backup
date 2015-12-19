@@ -43,7 +43,7 @@ final class Filesize
      *
      * Note: size format is case insensitive.
      *
-     * @param $size
+     * @param string|int $size
      * @return int
      */
     public static function getBytes($size)
@@ -58,7 +58,7 @@ final class Filesize
         $unit = str_replace($numeric, '', $size);
 
         if (isset(self::$units[$unit])) {
-            return $numeric * self::$units[$unit];
+            return intval($numeric * self::$units[$unit]);
         }
 
         throw new \InvalidArgumentException(sprintf('Unknown size format: "%s"', $size));
