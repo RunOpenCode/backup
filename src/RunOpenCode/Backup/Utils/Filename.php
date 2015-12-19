@@ -25,9 +25,9 @@ final class Filename
     public static function sanitize($filename)
     {
         if (function_exists('mb_ereg_replace')) {
-            return mb_ereg_replace("([\.]{2,})", '', mb_ereg_replace("([^\w\s\d\-_~,;:\[\]\(\).])", '', $filename));
+            return mb_ereg_replace("([\.]{2,})", '', mb_ereg_replace("([^\w\s\d\-_~\[\]\(\).])", '', $filename));
         } else {
-            return preg_replace("/([\.]{2,})/", '', preg_replace("/([^\w\s\d\-_~,;:\[\]\(\).])/", '', $filename));
+            return preg_replace("/([\.]{2,})/", '', preg_replace("/([^\w\s\d\-_~\[\]\(\).])/", '', $filename));
         }
     }
 

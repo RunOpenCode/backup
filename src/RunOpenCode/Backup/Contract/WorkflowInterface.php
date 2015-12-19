@@ -19,7 +19,7 @@ namespace RunOpenCode\Backup\Contract;
  *
  * @package RunOpenCode\Backup\Workflow
  */
-interface WorkflowInterface
+interface WorkflowInterface extends EventDispatcherAwareInterface, LoggerAwareInterface
 {
     /**
      * Execute backup profile in defined workflow.

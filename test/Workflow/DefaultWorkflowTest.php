@@ -43,7 +43,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             new NullDestination(),
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            WorkflowFactory::build()
         );
 
         $eventStack = array_reverse(array(
@@ -68,7 +68,12 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             $eventDispatcher->addListener($eventName, $listener);
         }
 
-        $profile->getWorkflow()->execute($profile);
+        $workflow = $profile->getWorkflow();
+
+        $workflow->setLogger($logger);
+        $workflow->setEventDispatcher($eventDispatcher);
+
+        $workflow->execute($profile);
     }
 
     /**
@@ -93,7 +98,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             new NullDestination(),
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            WorkflowFactory::build()
         );
 
         $listener = function(BackupEvent $event, $eventName) use (&$eventStack) {
@@ -104,8 +109,13 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
 
         $eventDispatcher->addListener(BackupEvents::ERROR, $listener);
 
+        $workflow = $profile->getWorkflow();
+
+        $workflow->setLogger($logger);
+        $workflow->setEventDispatcher($eventDispatcher);
+
         try {
-            $profile->getWorkflow()->execute($profile);
+            $workflow->execute($profile);
         } catch (SourceException $e) {
             // noop
         }

@@ -42,12 +42,7 @@ final class MinCountMaxSizeRotator implements RotatorInterface
         }
 
         $this->minCount = $minCount;
-
-        if (is_numeric($maxSize)) {
-            $this->maxSize = intval($maxSize);
-        } else {
-            $this->maxSize = Filesize::getBytes($maxSize);
-        }
+        $this->maxSize = Filesize::getBytes($maxSize);
     }
 
     /**

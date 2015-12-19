@@ -54,18 +54,11 @@ final class Filesize
 
         $size = strtolower(trim($size));
 
-        foreach (self::$units as $unit => $bytes) {
+        $numeric = preg_replace('/[^0-9]/', '', $size);
+        $unit = str_replace($numeric, '', $size);
 
-            if (($temp = strlen($size) - strlen($unit)) >= 0 && strpos($size, $unit, $temp) !== false) {
-
-                $numberPart = str_replace($unit, '', $size);
-
-                if (is_numeric($numberPart) && $numberPart > 0) {
-                    return intval($bytes * $numberPart);
-                } else {
-                    throw new \InvalidArgumentException(sprintf('Invalid size format: "%s"', $numberPart));
-                }
-            }
+        if (isset(self::$units[$unit])) {
+            return $numeric * self::$units[$unit];
         }
 
         throw new \InvalidArgumentException(sprintf('Unknown size format: "%s"', $size));

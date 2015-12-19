@@ -12,9 +12,6 @@
  */
 namespace RunOpenCode\Backup\Workflow;
 
-use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-
 final class WorkflowFactory
 {
     private function __construct() { }
@@ -22,13 +19,11 @@ final class WorkflowFactory
     /**
      * Builds default workflow.
      *
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param LoggerInterface $logger
      * @return Workflow
      */
-    public static function build(EventDispatcherInterface $eventDispatcher, LoggerInterface $logger)
+    public static function build()
     {
-        return new Workflow($eventDispatcher, $logger, array(
+        return new Workflow(array(
             new Fetch(),
             new Process(),
             new Name(),

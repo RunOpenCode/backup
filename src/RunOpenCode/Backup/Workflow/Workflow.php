@@ -22,7 +22,9 @@ use RunOpenCode\Backup\Contract\WorkflowActivityInterface;
 use RunOpenCode\Backup\Contract\WorkflowInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
 use RunOpenCode\Backup\Event\BackupEvents;
+use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\EmptySourceException;
+use RunOpenCode\Backup\Log\LoggerAwareTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -34,25 +36,16 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class Workflow implements WorkflowInterface
 {
+    use EventDispatcherAwareTrait;
+    use LoggerAwareTrait;
+
     /**
      * @var WorkflowActivityInterface[]
      */
     private $activities;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    public function __construct(EventDispatcherInterface $eventDispatcher, LoggerInterface $logger, array $activities)
+    public function __construct(array $activities)
     {
-        $this->eventDispatcher = $eventDispatcher;
-        $this->logger = $logger;
         $this->activities = $activities;
     }
 
@@ -61,6 +54,10 @@ class Workflow implements WorkflowInterface
      */
     public function execute(ProfileInterface $profile)
     {
+        if (empty($this->eventDispatcher) || empty($this->logger)) {
+            throw new \LogicException('Workflow can not be executed without provided Logger and EventDispatcher.');
+        }
+
         $backup = new Backup($profile->getName());
 
         $this->logger->info(sprintf('About to execute backup for profile: "%s".', $profile->getName()));

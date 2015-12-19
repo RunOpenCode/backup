@@ -31,8 +31,20 @@ final class Manager implements ManagerInterface
      */
     private $profiles;
 
-    public function __construct($profiles = array())
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(EventDispatcherInterface $eventDispatcher, LoggerInterface $logger, $profiles = array())
     {
+        $this->eventDispatcher = $eventDispatcher;
+        $this->logger = $logger;
         $this->profiles = $profiles;
     }
 
@@ -70,7 +82,12 @@ final class Manager implements ManagerInterface
             throw new \RuntimeException(sprintf('Unknown profile: "%s".', $name));
         }
 
-        $this->get($name)->getWorkflow()->execute($this->get($name));
+        $workflow = $this->get($name)->getWorkflow();
+
+        $workflow->setLogger($this->logger);
+        $workflow->setEventDispatcher($this->eventDispatcher);
+
+        $workflow->execute($this->get($name));
 
         return $this;
     }
