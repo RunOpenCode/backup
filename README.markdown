@@ -20,11 +20,44 @@ Every process of backup can be broken down to several activities:
 
 Having in mind the process stated above, we can extrapolate several major parts of backup system:
 
-- Source
-- Processor
-- Namer
-- Rotator
-- Destination
+- **Source** of files which needs to be backed up. Even database belongs to this category, since database backup is a file.
+- **Backup** is collection of **Files** retrieved from Sources.
+- **Processor** process Files within backup somehow (usually compress them into single archive, but it is not limited to mentioned).
+- **Namer** provides new name for Backup according to some desired rule (timestamping or similar).
+- **Rotator** checks previous backups within backup storage and removes old backups if some rotation constraint is violated 
+              (per example, max size of backup storage).
+- **Destination** is abstraction of backup storage where backups residue.
+- **Workflow** is abstraction of backup process which is executed trough sequence of backup activities.
+- **Profile** is collection of all above stated, it defines what have to backed up, how backup has to be processed, what 
+              name to use, where to store new backups and how to rotate old backups.
+
+
+# Source and File
+Source is defined within `RunOpenCode\Backup\Contract\SourceInterface` and have only one method defined: `fetch`. Expected 
+result from Source implementation is collection of `RunOpenCode\Backup\Contract\FileInterface`. File interface is abstraction
+of file which is subject of backup process. Concrete implementation is provided within this library as 
+`RunOpenCode\Backup\Backup\File`.
+
+Backup library currently provides you with several `SourceInterface` implementations:
+
+- `RunOpenCode\Backup\Source\NullSource` which is empty implementation of above mentioned interface which is used for testing
+                                         purposes, but it can be used as well in production environment in conjunction with 
+                                         events (which will be explained later on).
+- `RunOpenCode\Backup\Source\GlobSource` which fetches files to backup from local drive using glob expressions (see [glob](http://php.net/manual/de/function.glob.php)
+                                         for more details.)
+- `RunOpenCode\Backup\Source\MySqlDumpSource` which fetches MySQL dump output in file and allows you to backup your MySQL 
+                                              database.
+- `RunOpenCode\Backup\Source\SourceCollection` which is collection of several `SourceInterface` implementations. It allows
+                                               you to use several sources at once for your backup profile (per example, to backup
+                                               both files and databases of your web application).
+
+                                               
+# Backup
+Backup is abstraction of backup job, it is a collection of backup Files, and has its unique name.
+ 
+# Processor
+Usually, when we are doing some backup, we process our backup files (per example - we compress them into one single archive).
+Processor is defined within `RunOpenCode\Backup\Contract\ProcessorInterface` and have only one method defined: `process`.
 
 
 -------------------
