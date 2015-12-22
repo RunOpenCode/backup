@@ -33,6 +33,7 @@ Having in mind the process stated above, we can extrapolate several major parts 
 
 
 # Source and File
+
 Source is defined within `RunOpenCode\Backup\Contract\SourceInterface` and have only one method defined: `fetch`. Expected 
 result from Source implementation is collection of `RunOpenCode\Backup\Contract\FileInterface`. File interface is abstraction
 of file which is subject of backup process. Concrete implementation is provided within this library as 
@@ -51,15 +52,32 @@ Backup library currently provides you with several `SourceInterface` implementat
                                                you to use several sources at once for your backup profile (per example, to backup
                                                both files and databases of your web application).
 
-                                               
+
 # Backup
+
 Backup is abstraction of backup job, it is a collection of backup Files, and has its unique name.
- 
+
+
 # Processor
+
 Usually, when we are doing some backup, we process our backup files (per example - we compress them into one single archive).
 Processor is defined within `RunOpenCode\Backup\Contract\ProcessorInterface` and have only one method defined: `process`.
 
+Purpose of processor is to somehow modify the collection of files scheduled for backup, and to return the resulting files
+of that modification.
 
+Backup library currently provides you with several `ProcessorInterface` implementations:
+
+- `RunOpenCode\Backup\Processor\NullProcessor` which is empty implementation of above mentioned interface. It is used for testing
+                                               purposes, however, it can be used when you do not want to process backup files (per
+                                               example, for incremental snapshot backups).
+- `RunOpenCode\Backup\Processor\GzipArchiveProcessor` which compress all backup files into one gzip archive. 
+                                                      Requires gzip installed on system, accessible via console.
+- `RunOpenCode\Backup\Processor\ZipArchiveProcessor` which compress all backup files into one zip archive.
+                                                     Requires zip installed on system, accessible via console.
+- `RunOpenCode\Backup\Processor\ProcessorCollection` which is collection of several implementations of `ProcessorInterface`
+                                                     that allows you to do several successive processing activities agains
+                                                     backup files.
 -------------------
 
 
