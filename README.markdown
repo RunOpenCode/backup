@@ -34,7 +34,7 @@ Having in mind the process stated above, we can extrapolate several major parts 
 
 # Source and File
 
-Source is defined within `RunOpenCode\Backup\Contract\SourceInterface` and have only one method defined: `fetch`. Expected 
+Source is defined within `RunOpenCode\Backup\Contract\SourceInterface` and have only one method defined: `fetch()`. Expected 
 result from Source implementation is collection of `RunOpenCode\Backup\Contract\FileInterface`. File interface is abstraction
 of file which is subject of backup process. Concrete implementation is provided within this library as 
 `RunOpenCode\Backup\Backup\File`.
@@ -61,7 +61,7 @@ Backup is abstraction of backup job, it is a collection of backup Files, and has
 # Processor
 
 Usually, when we are doing some backup, we process our backup files (per example - we compress them into one single archive).
-Processor is defined within `RunOpenCode\Backup\Contract\ProcessorInterface` and have only one method defined: `process`.
+Processor is defined within `RunOpenCode\Backup\Contract\ProcessorInterface` and have only one method defined: `process(array $files)`.
 
 Purpose of processor is to somehow modify the collection of files scheduled for backup, and to return the resulting files
 of that modification.
@@ -78,6 +78,61 @@ Backup library currently provides you with several `ProcessorInterface` implemen
 - `RunOpenCode\Backup\Processor\ProcessorCollection` which is collection of several implementations of `ProcessorInterface`
                                                      that allows you to do several successive processing activities agains
                                                      backup files.
+
+# Namer
+                                                     
+Your backup files will be stored in one directory in your backup storage. Namer will provide a name for that directory.
+Namers implement `RunOpenCode\Backup\Contract\NamerInterface` which contains only one method: `getName()`. 
+
+Backup library provides you with two default namer implementations:
+
+- `RunOpenCode\Backup\Namer\Constant` which will always provide exact same name for your new backup directory.
+- `RunOpenCode\Backup\Namer\Timestamp` which will provide you with name of directory based on current date and time.
+
+Depending on naming strategy, you can get different results with your backup. With `RunOpenCode\Backup\Namer\Constant`
+you can implement incremental backup, snapshot backup, which will behave as `rsync` Unix utility. With timestamp namer,
+`RunOpenCode\Backup\Namer\Timestamp`, each new backup can be stored in new directory. 
+
+However, you can configure timestamp namer to use, per example, only day of the week, so you can store only last 7 
+backups without using rotators. 
+
+Nevertheless, it is advise to use namers for defining weather it will be a incremental backup, or complete backup, while
+rotators should be used for rotations of old backups.
+
+# Rotator
+
+Rotator will nominate old backups for removal from backup storage, if some conditions are met. Rotator is defined with 
+`RunOpenCode\Backup\Contract\RotatorInterface` and have only one method: `nominate(array $backups)`. Rotator can not 
+remove old backups, rotator is not aware of backup storage, his only role in process is to nominate old backups for 
+removal from list of backups.
+
+Backup library provides you with several rotators:
+
+- `RunOpenCode\Backup\Rotator\NullRotator` which never nominates any backup for removal. It is used for testing purposes,
+                                           however, it can be used in your backup process if you want to keep all backups.
+- `RunOpenCode\Backup\Rotator\MaxCountRotator` will keep up to maximum defined number of backups. If there are more backups
+                                               than maximum allowed, oldest backups get nominated for removal.
+- `RunOpenCode\Backup\Rotator\MaxSizeRotator` will keep up to maximum total size of all backups. If size of backups is
+                                              larger than maximum allowed, oldest backups get nominated for removal.
+- `RunOpenCode\Backup\Rotator\MinCountMaxSizeRotator` nominates backups for removal using same method as `MaxSizeRotator`,
+                                                      however, rotator will keep minimum defined number of backups even
+                                                      if maximum size constrain is violated.
+- `RunOpenCode\Backup\Rotator\RotatorCollection` can be used to aggregate nominations from several different rotators.
+
+
+Note that default backup workflow within this library defines pre-rotation and post-rotation. Pre-rotation is executed
+before backup is copied to backup storage (destination), while post-rotation is executed after backup is copied to backup
+storage.
+
+The reason behind this is that file system operations are not transactional. If removal of old backup is executed prior 
+to pushing new backup to backup storage, and coping fails, you could end up with one backup less as a result of operation.
+However, if removal of old backup is executed after pushing new backup to backup storage, and coping fails, you would still
+keep old backups.
+                                                                     
+Pre and post rotation should support wishes of booth more and/or less conservative system administrator.                                                                      
+                                                     
+# Destination
+                                      
 -------------------
 
 
