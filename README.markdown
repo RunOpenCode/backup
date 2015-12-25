@@ -16,7 +16,7 @@ Every process of backup can be broken down to several activities:
 - Prepare files to backup from various sources (filesystem, database...)
 - Process those files somehow (create zip archive, per example) and name it according to some convention
 - Determine if there is sufficient backup space on your backup storage system, and delete old backups if neccessary
-- Copy new backup to backup destination
+- Copy new backup to backup destination (usually into new folder named with current date and time)
 
 Having in mind the process stated above, we can extrapolate several major parts of backup system:
 
@@ -30,7 +30,7 @@ Having in mind the process stated above, we can extrapolate several major parts 
 - **Workflow** is abstraction of backup process which is executed trough sequence of backup activities.
 - **Profile** is collection of all above stated, it defines what have to backed up, how backup has to be processed, what 
               name to use, where to store new backups and how to rotate old backups.
-
+- **Manager** is collection of profiles, he provides profiles with Logger and EventDispatcher and executes them.
 
 # Source and File
 
@@ -132,6 +132,99 @@ keep old backups.
 Pre and post rotation should support wishes of booth more and/or less conservative system administrator.                                                                      
                                                      
 # Destination
+
+Destination is abstraction of backup storage. Each destination implements `RunOpenCode\Backup\Contract\Destination` interface
+which is most complex component in this library and have several responsibilities:
+
+- Copies backup files from source to backup destination into relevant directory. If that directory is not empty, it will
+  synchronize source files with files in that directory providing the user with possibility to have incremental backups
+  (method: `push(BackupInterface $backup)`). Directory name should be same as sanitized backup name.
+- Provides getters and hasers for backups and enables iteration trough existing backups (methods: `get($name)`, 
+  `has($name)`, `all()` and implementing interfaces `\IteratorAggregate` and `\Countable`).
+- Supports removal of existing backups (method: `delete($name)`). 
+
+Backup library provide you with several default implementations:
+
+- `RunOpenCode\Backup\Destination\NullDestination` which is used for testing purposes, but it can be used in production
+                                                   environments in conjunction with events (which will be explained latter
+                                                   on).
+- `RunOpenCode\Backup\Destination\LocalDestination` which is abstraction of local file system. You can use local destination
+                                                    when backup storage is on mountable device. `LocalDestination` requires
+                                                    `symfony/filesystem` to be installed.
+- `RunOpenCode\Backup\Destination\FlysystemDestination` can be used in conjunction with optional package `league/flysystem`.
+                                                        You can read more about Flysystem [here](http://flysystem.thephpleague.com).
+                                                        In general, Flysystem is abstraction of various storage systems, which includes,
+                                                        but not limited to, Dropbox, Azure, AWS, etc.
+
+Additionally, you are provided with possibility to use multiple destinations for your backups, by using:
+                                                        
+- `RunOpenCode\Backup\Destination\DestinationCollection` which is collection of several destinations. This will allow you
+                                                         to have redundant copies of your backups. Note that `DestinationCollection`
+                                                         `push()` method will fail if any of destination within the collection fails with 
+                                                         `push()` method.
+- `RunOpenCode\Backup\Destination\ReplicatedDestination` defines master destination and slave destination. Difference between 
+                                                         `ReplicatedDestination` and `DestinationCollection` is that if slave destination
+                                                         in `ReplicatedDestination::push()` method fails, backup will not fail, 
+                                                         it will be considered as successful. 
+                                                         
+Note that you can combine `ReplicatedDestination` and `DestinationCollection` to achieve various different backup 
+storage systems, from simple ones to very complex.                                                                                                                   
+                                                        
+# Workflow
+                                                  
+Workflow is abstraction of backup process, a sequence of activities which needs to be undertaken for backup process to be 
+successfully completed.
+                                                  
+Workflow is defined with `RunOpenCode\Backup\Contract\WorkflowInterface`, while workflow activity is defined with 
+`RunOpenCode\Backup\Contract\WorkflowActivityInterface`. In that matter, you can consider a Workflow as collection of 
+Activities, executed in ordered sequence.
+
+Backup library provides you with default implementation of workflow: `RunOpenCode\Backup\Workflow\Workflow`, a workflow 
+factory `RunOpenCode\Backup\Workflow\WorkflowFactory` with stati method `build()` that will create default workflow
+with following activities in sequence:
+
+1. `RunOpenCode\Backup\Workflow\Fetch` activity in which files for backup are fetched from source.
+2. `RunOpenCode\Backup\Workflow\Process` activity in which files for backup are processed.
+3. `RunOpenCode\Backup\Workflow\Name` activity in which backup gets its name.
+4. `RunOpenCode\Backup\Workflow\PreRotate` activity in which existing old backups on destination are rotated. 
+5. `RunOpenCode\Backup\Workflow\Push` activity in which backup is pushed to destination.
+6. `RunOpenCode\Backup\Workflow\PostRotate` activity in which existing old backups on destination are rotated.
+
+Note that you can modify this workflow to suit your needs, if provided one is not according to your desired backup
+workflow.
+
+You should note that default implementation of workflow, `RunOpenCode\Backup\Workflow\Workflow` depends on 
+`Symfony\Component\EventDispatcher\EventDispatcherInterface` and `Psr\Log\LoggerInterface`, as well as
+provided workflow activities. However, neither workflow, nor its activities, resolves that dependency during the 
+construction process. Workflow will provide EventDispatcher and Logger to the activities prior to their execution via 
+setters, while workflow will be provided with mentioned prior to its execution via Manager (which will be explained latter on).
+
+# Profile
+
+Profile is defined with `RunOpenCode\Backup\Contract\ProfileInterface` while default implementation 
+`RunOpenCode\Backup\Backup\Profile` is provided. Backup profile defines:
+ 
+- Source of files for backup.
+- Processor which will proces those files.
+- Namer which will provide the name for each new backup.
+- Pre and Post rotators which will rotate existing old backups.
+- Destination where backup will be stored.
+- Workflow of activities which executes backup process.
+
+If you think about your project, application which you want to backup, profiles for your application would be, per example:
+
+- Hourly snapshot - profile would be executed every hour.
+- Daily backup - profile would be executed every day.
+- Weekly backup - profile would be executed every week.
+- ...
+                                                 
+# Manager
+                                                 
+Manager is defined with `RunOpenCode\Backup\Contract\ManagerInterface`, he executes profiles and provides their workflows
+with `EventDispatcher` and `Logger` prior their execution.
+                                                  
+                                                  
+                                                 
                                       
 -------------------
 
