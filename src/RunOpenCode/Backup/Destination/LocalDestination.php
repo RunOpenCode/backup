@@ -118,8 +118,8 @@ class LocalDestination extends BaseDestination
 
         $this->removeEmptyDirectories($backupDirectory);
 
-        if (!empty($this->backups)) {
-            $this->backups[] = $backup;
+        if (is_array($this->backups)) {
+            $this->backups[$backup->getName()] = $backup;
         }
     }
 

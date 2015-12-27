@@ -37,8 +37,15 @@ final class Manager implements ManagerInterface
 
     public function __construct(WorkflowInterface $workflow, $profiles = array())
     {
-        $this->profiles = $profiles;
+        $this->profiles = array();
         $this->workflow = $workflow;
+
+        if (!empty($profiles)) {
+
+            foreach ($profiles as $profile) {
+                $this->add($profile);
+            }
+        }
     }
 
     /**

@@ -18,7 +18,6 @@ use RunOpenCode\Backup\Contract\ProcessorInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
 use RunOpenCode\Backup\Contract\RotatorInterface;
 use RunOpenCode\Backup\Contract\SourceInterface;
-use RunOpenCode\Backup\Contract\WorkflowInterface;
 
 /**
  * Class Profile

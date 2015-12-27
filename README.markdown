@@ -191,13 +191,31 @@ method `build()` that will create default workflow with following activities in 
 6. `RunOpenCode\Backup\Workflow\PostRotate` activity in which existing old backups on destination are rotated.
 
 Note that you can modify this workflow to suit your needs, if provided one is not according to your desired backup
-workflow.
+workflow. However, this can be considered as edge case.
 
 You should note that default implementation of workflow, `RunOpenCode\Backup\Workflow\Workflow` depends on 
 `Symfony\Component\EventDispatcher\EventDispatcherInterface` and `Psr\Log\LoggerInterface`, as well as
 provided workflow activities. However, neither workflow, nor its activities, resolves that dependency during the 
 construction process. Workflow will provide EventDispatcher and Logger to the activities prior to their execution via 
 setters, while workflow should be provided with mentioned prior to its execution.
+
+## Events
+
+Events and Symfony EventDispatcher are major difference between this library and original `kbond/php-backup` library.
+Events which are dispatched within this library and default workflow are defined in `RunOpenCode\Backup\Event\BackupEvents`
+while dispatched events are instance of `RunOpenCode\Backup\Event\BackupEvent`.
+
+Events are used to follow up every defined backup workflow activity which allows you to:
+
+- **Modify and/or filter results of each workflow activity.** Per example, you can use `RunOpenCode\Backup\Source\NullSource`
+  which will return no files for backup, and add files for backup manually by hooking up to `BackupEvents::FETCH` event. 
+  In that matter, every "Null" implementation in this library makes sense and can be used in production in conjunction with
+  EventDispatcher.
+- **Release and clean up resources which are not required anymore.** Some implementations of this library components requires
+  some kind of cleaning up. Per example, backup of MySQL database requires usage of temporary file, which ought to be cleaned
+  up when backup process is terminated. By hooking up to `BackupEvents::TERMINATE` event, `RunOpenCode\Backup\Source\MySqlDumpSource`
+  gets notified when temporary file is not used anymore and can be removed from system.  
+
 
 # Profile
 
@@ -224,6 +242,13 @@ He holds references to all profiles, allows iteration trough profiles, and their
 injection or service locator in your project, Manager should be only one public entry point into library, while other 
 components should be injected into manager as hidden/private dependencies. 
 
+
+
+
+# Notes on providing EventDispatcher and Logger to the classes within library
+
+
+                                                  
                                                   
                                                   
                                                  
