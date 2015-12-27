@@ -12,13 +12,9 @@
  */
 namespace RunOpenCode\Backup\Workflow;
 
-use RunOpenCode\Backup\Contract\EventDispatcherAwareInterface;
-use RunOpenCode\Backup\Contract\LoggerAwareInterface;
 use RunOpenCode\Backup\Event\BackupEvent;
 use RunOpenCode\Backup\Event\BackupEvents;
-use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\EmptySourceException;
-use RunOpenCode\Backup\Log\LoggerAwareTrait;
 
 /**
  * Class Fetch
@@ -27,11 +23,8 @@ use RunOpenCode\Backup\Log\LoggerAwareTrait;
  *
  * @package RunOpenCode\Backup\Workflow
  */
-class Fetch extends BaseActivity implements LoggerAwareInterface, EventDispatcherAwareInterface
+class Fetch extends BaseActivity
 {
-    use LoggerAwareTrait;
-    use EventDispatcherAwareTrait;
-
     /**
      * {@inheritdoc}
      */

@@ -20,6 +20,7 @@ use RunOpenCode\Backup\Event\BackupEvents;
 use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
 use RunOpenCode\Backup\Exception\ProcessorException;
 use RunOpenCode\Backup\Utils\Filename;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Process\ProcessBuilder;
 
 /**
@@ -31,7 +32,6 @@ use Symfony\Component\Process\ProcessBuilder;
  */
 class GzipArchiveProcessor implements ProcessorInterface, EventDispatcherAwareInterface
 {
-
     use EventDispatcherAwareTrait;
 
     /**

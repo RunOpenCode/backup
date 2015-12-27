@@ -24,7 +24,7 @@ use RunOpenCode\Backup\Processor\NullProcessor;
 use RunOpenCode\Backup\Rotator\NullRotator;
 use RunOpenCode\Backup\Source\NullSource;
 use RunOpenCode\Backup\Workflow\Process;
-use RunOpenCode\Backup\Workflow\WorkflowFactory;
+use RunOpenCode\Backup\Workflow\Workflow;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class ProcessTest extends \PHPUnit_Framework_TestCase
@@ -46,7 +46,7 @@ class ProcessTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             new NullDestination(),
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            Workflow::build($eventDispatcher, $logger)
         );
 
         $processActivity->setLogger($logger);
@@ -88,7 +88,7 @@ class ProcessTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             new NullDestination(),
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            Workflow::build($eventDispatcher, $logger)
         );
 
         $processActivity->setLogger($logger);

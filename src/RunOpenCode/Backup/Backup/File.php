@@ -111,7 +111,7 @@ final class File implements FileInterface
      */
     public function getCreatedAt()
     {
-        return clone $this->createdAt;
+        return (!is_null($this->createdAt)) ? clone $this->createdAt : null;
     }
 
     /**
@@ -119,7 +119,7 @@ final class File implements FileInterface
      */
     public function getModifiedAt()
     {
-        return clone $this->modifiedAt;
+        return (!is_null($this->modifiedAt)) ? clone $this->modifiedAt : null;
     }
 
     /**

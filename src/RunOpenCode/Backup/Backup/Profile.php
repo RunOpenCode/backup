@@ -64,8 +64,6 @@ final class Profile implements ProfileInterface
      */
     private $postRotator;
 
-    private $workflow;
-
     public function __construct(
         $name,
         SourceInterface $source,
@@ -73,8 +71,7 @@ final class Profile implements ProfileInterface
         NamerInterface $namer,
         RotatorInterface $preRotator,
         DestinationInterface $destination,
-        RotatorInterface $postRotator,
-        WorkflowInterface $workflow
+        RotatorInterface $postRotator
     ) {
         $this->name = $name;
         $this->source = $source;
@@ -83,7 +80,6 @@ final class Profile implements ProfileInterface
         $this->preRotator = $preRotator;
         $this->destination = $destination;
         $this->postRotator = $postRotator;
-        $this->workflow = $workflow;
     }
 
     /**
@@ -140,13 +136,5 @@ final class Profile implements ProfileInterface
     public function getPostRotator()
     {
         return $this->postRotator;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getWorkflow()
-    {
-        return $this->workflow;
     }
 }

@@ -26,7 +26,6 @@ use RunOpenCode\Backup\Log\LoggerAwareTrait;
  */
 final class ReplicatedDestination implements DestinationInterface
 {
-
     use LoggerAwareTrait;
 
     /**
@@ -64,7 +63,7 @@ final class ReplicatedDestination implements DestinationInterface
 
             if ($this->atomic) {
                 throw $e;
-            } elseif ($this->getLogger()) {
+            } else {
                 $this->getLogger()->error('Unable to backup to slave destination.', array(
                     'message' => $e->getMessage(),
                     'code' => $e->getCode(),

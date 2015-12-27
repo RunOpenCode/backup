@@ -15,11 +15,11 @@ namespace RunOpenCode\Backup\Contract;
 /**
  * Interface WorkflowActivityInterface
  *
- * Workflow is sequence of activities required to be executed in order to execute backup activity.
+ * Workflow activity is activity in sequence of activities required to be executed in order to execute backup activity.
  *
  * @package RunOpenCode\Backup\Contract
  */
-interface WorkflowActivityInterface
+interface WorkflowActivityInterface extends LoggerAwareInterface, EventDispatcherAwareInterface
 {
     /**
      * @param BackupInterface $backup
@@ -35,6 +35,8 @@ interface WorkflowActivityInterface
 
     /**
      * Execute workflow activity.
+     *
+     * @return WorkflowActivityInterface Next activity in sequence.
      */
     public function execute();
 }

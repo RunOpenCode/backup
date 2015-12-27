@@ -27,7 +27,8 @@ Having in mind the process stated above, we can extrapolate several major parts 
 - **Rotator** checks previous backups within backup storage and removes old backups if some rotation constraint is violated 
               (per example, max size of backup storage).
 - **Destination** is abstraction of backup storage where backups residue.
-- **Workflow** is abstraction of backup process which is executed trough sequence of backup activities.
+- **Workflow** is abstraction of backup process which is executed trough sequence of backup activities. This library provides 
+               default workflow, which can be replaced with your own if default one does not suits your needs.
 - **Profile** is collection of all above stated, it defines what have to backed up, how backup has to be processed, what 
               name to use, where to store new backups and how to rotate old backups.
 - **Manager** is collection of profiles, he provides profiles with Logger and EventDispatcher and executes them.
@@ -179,9 +180,8 @@ Workflow is defined with `RunOpenCode\Backup\Contract\WorkflowInterface`, while 
 `RunOpenCode\Backup\Contract\WorkflowActivityInterface`. In that matter, you can consider a Workflow as collection of 
 Activities, executed in ordered sequence.
 
-Backup library provides you with default implementation of workflow: `RunOpenCode\Backup\Workflow\Workflow`, a workflow 
-factory `RunOpenCode\Backup\Workflow\WorkflowFactory` with stati method `build()` that will create default workflow
-with following activities in sequence:
+Backup library provides you with default implementation of workflow: `RunOpenCode\Backup\Workflow\Workflow` with static 
+method `build()` that will create default workflow with following activities in sequence:
 
 1. `RunOpenCode\Backup\Workflow\Fetch` activity in which files for backup are fetched from source.
 2. `RunOpenCode\Backup\Workflow\Process` activity in which files for backup are processed.
@@ -197,7 +197,7 @@ You should note that default implementation of workflow, `RunOpenCode\Backup\Wor
 `Symfony\Component\EventDispatcher\EventDispatcherInterface` and `Psr\Log\LoggerInterface`, as well as
 provided workflow activities. However, neither workflow, nor its activities, resolves that dependency during the 
 construction process. Workflow will provide EventDispatcher and Logger to the activities prior to their execution via 
-setters, while workflow will be provided with mentioned prior to its execution via Manager (which will be explained latter on).
+setters, while workflow should be provided with mentioned prior to its execution.
 
 # Profile
 
@@ -209,7 +209,6 @@ Profile is defined with `RunOpenCode\Backup\Contract\ProfileInterface` while def
 - Namer which will provide the name for each new backup.
 - Pre and Post rotators which will rotate existing old backups.
 - Destination where backup will be stored.
-- Workflow of activities which executes backup process.
 
 If you think about your project, application which you want to backup, profiles for your application would be, per example:
 
@@ -220,8 +219,11 @@ If you think about your project, application which you want to backup, profiles 
                                                  
 # Manager
                                                  
-Manager is defined with `RunOpenCode\Backup\Contract\ManagerInterface`, he executes profiles and provides their workflows
-with `EventDispatcher` and `Logger` prior their execution.
+Manager is defined with `RunOpenCode\Backup\Contract\ManagerInterface`, default implementation is given with `RunOpenCode\Backup\Manager`.
+He holds references to all profiles, allows iteration trough profiles, and their execution. If you are using dependency 
+injection or service locator in your project, Manager should be only one public entry point into library, while other 
+components should be injected into manager as hidden/private dependencies. 
+
                                                   
                                                   
                                                  

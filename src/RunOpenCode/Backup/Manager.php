@@ -12,10 +12,9 @@
  */
 namespace RunOpenCode\Backup;
 
-use Psr\Log\LoggerInterface;
 use RunOpenCode\Backup\Contract\ManagerInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use RunOpenCode\Backup\Contract\WorkflowInterface;
 
 /**
  * Class Manager
@@ -32,20 +31,14 @@ final class Manager implements ManagerInterface
     private $profiles;
 
     /**
-     * @var EventDispatcherInterface
+     * @var WorkflowInterface
      */
-    private $eventDispatcher;
+    private $workflow;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    public function __construct(EventDispatcherInterface $eventDispatcher, LoggerInterface $logger, $profiles = array())
+    public function __construct(WorkflowInterface $workflow, $profiles = array())
     {
-        $this->eventDispatcher = $eventDispatcher;
-        $this->logger = $logger;
         $this->profiles = $profiles;
+        $this->workflow = $workflow;
     }
 
     /**
@@ -82,12 +75,8 @@ final class Manager implements ManagerInterface
             throw new \RuntimeException(sprintf('Unknown profile: "%s".', $name));
         }
 
-        $workflow = $this->get($name)->getWorkflow();
-
-        $workflow->setLogger($this->logger);
-        $workflow->setEventDispatcher($this->eventDispatcher);
-
-        $workflow->execute($this->get($name));
+        $profile = $this->get($name);
+        $this->workflow->execute($profile);
 
         return $this;
     }

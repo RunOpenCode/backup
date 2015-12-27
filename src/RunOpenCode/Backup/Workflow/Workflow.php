@@ -153,4 +153,21 @@ class Workflow implements WorkflowInterface
             throw $e;
         }
     }
+
+    /**
+     * Builds default workflow.
+     *
+     * @return Workflow
+     */
+    public static function build()
+    {
+        return new Workflow(array(
+            new Fetch(),
+            new Process(),
+            new Name(),
+            new PreRotate(),
+            new Push(),
+            new PostRotate()
+        ));
+    }
 }

@@ -24,7 +24,7 @@ use RunOpenCode\Backup\Processor\NullProcessor;
 use RunOpenCode\Backup\Rotator\NullRotator;
 use RunOpenCode\Backup\Source\NullSource;
 use RunOpenCode\Backup\Workflow\Push;
-use RunOpenCode\Backup\Workflow\WorkflowFactory;
+use RunOpenCode\Backup\Workflow\Workflow;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class PushTest extends \PHPUnit_Framework_TestCase
@@ -46,7 +46,7 @@ class PushTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             new NullDestination(),
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            Workflow::build($eventDispatcher, $logger)
         );
 
         $pushActivity->setLogger($logger);
@@ -93,7 +93,7 @@ class PushTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             $destinationStub,
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            Workflow::build($eventDispatcher, $logger)
         );
 
         $pushActivity->setLogger($logger);

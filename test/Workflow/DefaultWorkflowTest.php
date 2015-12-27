@@ -22,7 +22,7 @@ use RunOpenCode\Backup\Namer\Constant;
 use RunOpenCode\Backup\Processor\NullProcessor;
 use RunOpenCode\Backup\Rotator\NullRotator;
 use RunOpenCode\Backup\Source\NullSource;
-use RunOpenCode\Backup\Workflow\WorkflowFactory;
+use RunOpenCode\Backup\Workflow\Workflow;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
@@ -42,8 +42,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             new Constant(),
             new NullRotator(),
             new NullDestination(),
-            new NullRotator(),
-            WorkflowFactory::build()
+            new NullRotator()
         );
 
         $eventStack = array_reverse(array(
@@ -68,7 +67,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             $eventDispatcher->addListener($eventName, $listener);
         }
 
-        $workflow = $profile->getWorkflow();
+        $workflow = Workflow::build();
 
         $workflow->setLogger($logger);
         $workflow->setEventDispatcher($eventDispatcher);
@@ -97,8 +96,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             new Constant(),
             new NullRotator(),
             new NullDestination(),
-            new NullRotator(),
-            WorkflowFactory::build()
+            new NullRotator()
         );
 
         $listener = function(BackupEvent $event, $eventName) use (&$eventStack) {
@@ -109,7 +107,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
 
         $eventDispatcher->addListener(BackupEvents::ERROR, $listener);
 
-        $workflow = $profile->getWorkflow();
+        $workflow = Workflow::build();
 
         $workflow->setLogger($logger);
         $workflow->setEventDispatcher($eventDispatcher);

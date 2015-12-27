@@ -47,6 +47,10 @@ trait LoggerAwareTrait
      */
     public function getLogger()
     {
+        if (null === $this->logger) {
+            throw new \LogicException('Logger was not set');
+        }
+
         return $this->logger;
     }
 }

@@ -56,10 +56,12 @@ class ReplicatedDestinationTest extends BaseDestinationTest
 
         $master = new LocalDestination($this->directory . DIRECTORY_SEPARATOR . 'destination1');
 
+
         $slave = $this->getMockBuilder('RunOpenCode\\Backup\\Contract\\DestinationInterface')->getMock();
         $slave->method('push')->willThrowException(new DestinationException());
 
         $replica = new ReplicatedDestination($master, $slave);
+        $replica->setLogger(new NullLogger());
 
         $files = $this->fetchSomeFiles();
 

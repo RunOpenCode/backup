@@ -15,6 +15,7 @@ namespace RunOpenCode\Backup\Backup;
 
 use RunOpenCode\Backup\Contract\FileInterface;
 use RunOpenCode\Backup\Contract\BackupInterface;
+use RunOpenCode\Backup\Exception\BackupException;
 use RunOpenCode\Backup\Utils\Filename;
 
 /**
@@ -143,7 +144,7 @@ final class Backup implements BackupInterface
      */
     public function getCreatedAt()
     {
-        return $this->createdAt;
+        return (!is_null($this->createdAt)) ? clone $this->createdAt : null;
     }
 
     /**
@@ -151,8 +152,11 @@ final class Backup implements BackupInterface
      */
     public function setCreatedAt($createdAt)
     {
-        $this->createdAt = \DateTimeImmutable::createFromMutable((is_integer($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt));
+        if (!is_integer($createdAt) && !$createdAt instanceof \DateTime) {
+            throw new \InvalidArgumentException(sprintf('Integer or \DateTime expected, got: "%s".', BackupException::typeOf($createdAt)));
+        }
 
+        $this->createdAt = is_integer($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt;
         return $this;
     }
 
@@ -161,7 +165,7 @@ final class Backup implements BackupInterface
      */
     public function getModifiedAt()
     {
-        return $this->modifiedAt;
+        return (!is_null($this->modifiedAt)) ? clone $this->modifiedAt : null;
     }
 
     /**
@@ -169,8 +173,11 @@ final class Backup implements BackupInterface
      */
     public function setModifiedAt($modifiedAt)
     {
-        $this->modifiedAt = \DateTimeImmutable::createFromMutable((is_integer($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt));
+        if (!is_integer($modifiedAt) && !$modifiedAt instanceof \DateTime) {
+            throw new \InvalidArgumentException(sprintf('Integer or \DateTime expected, got: "%s".', BackupException::typeOf($modifiedAt)));
+        }
 
+        $this->modifiedAt = is_integer($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt;
         return $this;
     }
 }

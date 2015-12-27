@@ -25,7 +25,7 @@ use RunOpenCode\Backup\Rotator\NullRotator;
 use RunOpenCode\Backup\Source\GlobSource;
 use RunOpenCode\Backup\Source\NullSource;
 use RunOpenCode\Backup\Workflow\Fetch;
-use RunOpenCode\Backup\Workflow\WorkflowFactory;
+use RunOpenCode\Backup\Workflow\Workflow;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class FetchTest extends \PHPUnit_Framework_TestCase
@@ -47,7 +47,7 @@ class FetchTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             new NullDestination(),
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            Workflow::build($eventDispatcher, $logger)
         );
 
         $fetchActivity->setLogger($logger);
@@ -95,7 +95,7 @@ class FetchTest extends \PHPUnit_Framework_TestCase
             new NullRotator(),
             new NullDestination(),
             new NullRotator(),
-            WorkflowFactory::build($eventDispatcher, $logger)
+            Workflow::build($eventDispatcher, $logger)
         );
 
         $fetchActivity->setLogger($logger);

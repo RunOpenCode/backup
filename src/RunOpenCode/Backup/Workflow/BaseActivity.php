@@ -15,6 +15,8 @@ namespace RunOpenCode\Backup\Workflow;
 use RunOpenCode\Backup\Contract\BackupInterface;
 use RunOpenCode\Backup\Contract\ProfileInterface;
 use RunOpenCode\Backup\Contract\WorkflowActivityInterface;
+use RunOpenCode\Backup\Event\EventDispatcherAwareTrait;
+use RunOpenCode\Backup\Log\LoggerAwareTrait;
 
 /**
  * Class BaseActivity
@@ -25,6 +27,9 @@ use RunOpenCode\Backup\Contract\WorkflowActivityInterface;
  */
 abstract class BaseActivity implements WorkflowActivityInterface
 {
+    use LoggerAwareTrait;
+    use EventDispatcherAwareTrait;
+
     /**
      * @var ProfileInterface
      */
