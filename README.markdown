@@ -39,7 +39,8 @@ Having in mind the process stated above, we can identify several major parts of 
 # See if this library is for you by evaluating simple example
 
 Let's backup our website by creating simple application that will be executed by `crontab`. Let's say that our code is 
-in some `app.php` file
+in some `app.php` file (Don't be scared with amount of code - each line is commented so you can understand the concept with
+ease).
 
     <?php 
     /**
@@ -120,11 +121,9 @@ in some `app.php` file
     // And we can now execute backup process...
     $manager->execute('my-profile');
     
-Maybe it seams as a lot of code, however, this library provides you with very flexible way to define and execute your 
-backups.
-   
-However, library is intended to be used within frameworks where profile construction process ought to be simplified 
-via various configurations possibilities of concrete framework.
+This library provides you with very flexible way to define and execute your backups. However, library is intended to be
+used within frameworks where profile construction process ought to be simplified via various configurations possibilities 
+of concrete framework.
     
 Do read further more to find out how to use and extend library to your needs.    
 
