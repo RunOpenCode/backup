@@ -21,7 +21,7 @@ use RunOpenCode\Backup\Exception\SourceException;
 use RunOpenCode\Backup\Namer\Constant;
 use RunOpenCode\Backup\Processor\NullProcessor;
 use RunOpenCode\Backup\Rotator\NullRotator;
-use RunOpenCode\Backup\Source\NullSource;
+use RunOpenCode\Backup\Source\GlobSource;
 use RunOpenCode\Backup\Workflow\Workflow;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -37,7 +37,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
 
         $profile = new Profile(
             'test',
-            new NullSource(),
+            new GlobSource(realpath(__DIR__ . '/../Fixtures/glob/globSet1') . '/*'),
             new NullProcessor(),
             new Constant(),
             new NullRotator(),
@@ -56,15 +56,20 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             BackupEvents::TERMINATE
         ));
 
-        $listener = function(BackupEvent $event, $eventName) use (&$eventStack) {
-            $expected = array_pop($eventStack);
-            $this->assertEquals($expected, $eventName, sprintf('Expected backup event "%s" triggered.', $expected));
-        };
-
-        \Closure::bind($listener, $this);
+        $testCases = array();
 
         foreach ($eventStack as $eventName) {
-            $eventDispatcher->addListener($eventName, $listener);
+
+            $eventDispatcher->addListener($eventName,  function(BackupEvent $event, $eventName) use (&$eventStack, &$testCases) {
+
+                $expected = array_pop($eventStack);
+
+                $testCases[] = array(
+                    'expected' => $expected,
+                    'actual' => $eventName,
+                    'message' => sprintf('Expected backup event "%s" triggered.', $expected)
+                );
+            });
         }
 
         $workflow = Workflow::build();
@@ -73,6 +78,10 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
         $workflow->setEventDispatcher($eventDispatcher);
 
         $workflow->execute($profile);
+
+        foreach ($testCases as $testCase) {
+            $this->assertSame($testCase['expected'], $testCase['actual'], $testCase['message']);
+        }
     }
 
     /**
@@ -99,13 +108,11 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
             new NullRotator()
         );
 
-        $listener = function(BackupEvent $event, $eventName) use (&$eventStack) {
-            $this->assertEquals(BackupEvents::ERROR, $eventName, sprintf('Expected backup event "%s" triggered.', BackupEvents::ERROR));
-        };
+        $errorTriggered = false;
 
-        \Closure::bind($listener, $this);
-
-        $eventDispatcher->addListener(BackupEvents::ERROR, $listener);
+        $eventDispatcher->addListener(BackupEvents::ERROR, function(BackupEvent $event, $eventName) use (&$errorTriggered) {
+            $errorTriggered = true;
+        });
 
         $workflow = Workflow::build();
 
@@ -117,5 +124,7 @@ class DefaultWorkflowTest extends \PHPUnit_Framework_TestCase
         } catch (SourceException $e) {
             // noop
         }
+
+        $this->assertTrue($errorTriggered);
     }
 }

@@ -18,7 +18,7 @@ Every process of backup can be broken down to several activities:
 - Determine if there is sufficient backup space on your backup storage system, and delete old backups if neccessary
 - Copy new backup to backup destination (usually into new folder named with current date and time)
 
-Having in mind the process stated above, we can extrapolate several major parts of backup system:
+Having in mind the process stated above, we can identify several major parts of backup system:
 
 - **Source** of files which needs to be backed up. Even database belongs to this category, since database backup is a file.
 - **Backup** is collection of **Files** retrieved from Sources.
@@ -32,6 +32,101 @@ Having in mind the process stated above, we can extrapolate several major parts 
 - **Profile** is collection of all above stated, it defines what have to backed up, how backup has to be processed, what 
               name to use, where to store new backups and how to rotate old backups.
 - **Manager** is collection of profiles, he provides profiles with Logger and EventDispatcher and executes them.
+
+*Note that author of this brilliant idea on how to brake down to fundamental backup system components is [Kevin Bond](https://github.com/kbond).*   
+
+
+# See if this library is for you by evaluating simple example
+
+Let's backup our website by creating simple application that will be executed by `crontab`. Let's say that our code is 
+in some `app.php` file
+
+    <?php 
+    /**
+     * file: app.php
+     */
+    
+    require_once('vendor/autoload.php'); // We are going to use composer for autoloading.
+    
+    use Psr\Log\NullLogger;
+    use Symfony\Component\EventDispatcher\EventDispatcher;
+    use RunOpenCode\Backup\Source\MySqlDumpSource;
+    use RunOpenCode\Backup\Source\SourceCollection;
+    use RunOpenCode\Backup\Processor\ZipArchiveProcessor;
+    use RunOpenCode\Backup\Namer\Timestamp;
+    use RunOpenCode\Backup\Rotator\NullRotator;
+    use RunOpenCode\Backup\Rotator\MaxCountRotator;
+    use RunOpenCode\Backup\Destination\FlysystemDestination;
+    use RunOpenCode\Backup\Backup\Profile;
+    use RunOpenCode\Backup\Workflow\Workflow;
+    use RunOpenCode\Backup\Manager;
+    
+    use League\Flysystem\Dropbox\DropboxAdapter;
+    use League\Flysystem\Filesystem;
+    use Dropbox\Client;
+    
+    $logger = new NullLogger();                                 // Or you can use concrete logger if you like.
+    $eventDispatcher = new EventDispatcher();                   // We need event dispatcher as well.
+
+    // Let's define source of our website files, we will use glob source to fetch files
+    // Array keys are path to directories where files residue, while values are path prefixes which we would like to remove
+    // and work only with relative paths
+    $files = new GlobSource(array(
+        '/path/to/directory/with/files' => 'path/to/directory',           
+        '/other/path/to/directory/with/files' => 'other/path'            
+    ));
+
+    // Let's backup database as well...
+    $settings = array(...);
+    $database = new MySqlDumpSource($settings['database'], $settings['username'], $settings['password'], $settings['host'], $settings['port']);
+
+    // Our files and databases are things that we are want to backup, so we have to use source collection...
+    $source = new SourceCollection(array(
+        $files,
+        $database
+    ));
+    
+    // We will zip our backup files in order to save storage space 
+    $processor = new ZipArchiveProcessor('archive.zip');
+    // Note that processor requires event dispatcher...
+    $processor->setEventDispatcher($eventDispatcher);
+
+    // Our backups will get name based on current timestamp
+    $namer = new Timestamp();
+    
+    // We will not use pre-rotator...
+    $preRotator = new NullRotator();
+    // But we will use post-rotator... (see docs below for difference, this is just example) limiting number of backups to some number.
+    $postRotator = new MaxCountRotator(5);
+    
+    // And let's define our backup storage, per example, Dropbox via Flysystem (which is optional).
+    // @see http://flysystem.thephpleague.com/adapter/dropbox/
+    $client = new Client($accessToken, $appSecret);
+    $adapter = new DropboxAdapter($client, [$prefix]);
+    $filesystem = new Filesystem($adapter);
+    $destination = new FlysystemDestination($filesystem);
+    
+    // When we have components, lets define our profile:
+    $profile = new Profile('my-profile', $source, $processor, $namer, $preRotator, $destination, $postRotator);
+    
+    // We need workflow for manager, so we will build it and provide it with logger and event dispatcher
+    $workflow = Workflow::build();
+    $workflow->setEventDispatcher($eventDispatcher);
+    $workflow->setLogger($logger);
+    
+    // Finally, we will create manager, and feed him with profile.
+    $manager = new Manager($workflow, array($profile));
+    
+    // And we can now execute backup process...
+    $manager->execute('my-profile');
+    
+Maybe it seams as a lot of code, however, this library provides you with very flexible way to define and execute your 
+backups.
+   
+However, library is intended to be used within frameworks where profile construction process ought to be simplified 
+via various configurations possibilities of concrete framework.
+    
+Do read further more to find out how to use and extend library to your needs.    
 
 # Source and File
 
@@ -52,7 +147,6 @@ Backup library currently provides you with several `SourceInterface` implementat
 - `RunOpenCode\Backup\Source\SourceCollection` which is collection of several `SourceInterface` implementations. It allows
                                                you to use several sources at once for your backup profile (per example, to backup
                                                both files and databases of your web application).
-
 
 # Backup
 
@@ -216,6 +310,16 @@ Events are used to follow up every defined backup workflow activity which allows
   up when backup process is terminated. By hooking up to `BackupEvents::TERMINATE` event, `RunOpenCode\Backup\Source\MySqlDumpSource`
   gets notified when temporary file is not used anymore and can be removed from system.  
 
+By using event dispatching, API for backup components is simplified - there is no need for `cleanUp()` methods.
+
+**Important note:** some events will be dispatched, and some won't. However, in your application, you can always count
+on following events:
+
+- `BackupEvents::BEGIN` will be dispatched when backup is started for some profile.
+- `BackupEvents::TERMINATE` will be dispatched when backup is terminated for some profile, regardless of its result of 
+  execution. Use this event as indicator when to clean up all used temporary files and to release all resources.
+
+Other events depends on workflow and result of each workflow activity, as well as fact if there were some error in execution. 
 
 # Profile
 
@@ -243,16 +347,73 @@ injection or service locator in your project, Manager should be only one public 
 components should be injected into manager as hidden/private dependencies. 
 
 
+# Notes on EventDispatcher, Logger and throwing exceptions
+
+Note that some of the components in library depends on event dispatcher and/or logger. However, dependency is not provided 
+via constructor, it is provided via setters. Some of the components do depend on dispatcher and/or logger, some don't.
+
+In order to identify weather some class depends on dispatcher you can investigate if that class implements 
+`RunOpenCode\Backup\Contract\EventDispatcherAwareInterface`, while logger dependency can be investigated by checking
+if `RunOpenCode\Backup\Contract\LoggerAwareInterface` is implemented.
+
+Instances of `RunOpenCode\Backup\Contract\WorkflowInterface` and `RunOpenCode\Backup\Contract\WorkflowActivityInterface`
+depends on logger and dispatcher by design. They will log about progress of backup process and dispatch backup progress
+events.
+ 
+Some other classes within this library depends on event dispatcher in order to clean up temporary files and to release
+resources. 
+ 
+However, do note that by design it is intended for workflow and its activities to log and to dispatch events. Other components
+should subscribe to events only. If they have to notify about error - they should throw exception.
+
+## Logger and Event Dispatcher traits
+
+To simplify your implementation, when implementing `RunOpenCode\Backup\Contract\EventDispatcherAwareInterface` and
+`RunOpenCode\Backup\Contract\LoggerAwareInterface`, please note that
+
+- `RunOpenCode\Backup\Event\EventDispatcherAwareTrait`
+- `RunOpenCode\Backup\Log\LoggerAwareTrait`
+
+are at your disposal.
+
+# Extending the library
+                                               
+Do you need your own source, destination, processor? You can easily extend the library.
+                                               
+## Implementing your own source
+
+Your class needs to implement `RunOpenCode\Backup\Contract\SourceInterface`. Method `fetch()` should return collection
+of files `RunOpenCode\Backup\Contract\File` for backup. 
+                                               
+Note that each file has its path and relative path. Path is absolute path to file, so backup library can access to it and
+copy it to the backup destination. However, within backup directory, file will be saved under relative path. Relative path 
+is determined by root path of file.
+
+## Implementing your own processor
+
+Your class needs to implement `RunOpenCode\Backup\Contract\ProcessorInterface` with method `process(array $files)`. You will 
+get an collection of files that needs to be backed up. Your processor should do something with those files, and return collection
+of files that should be backed up after processing.
+
+## Implementing your own rotator
+
+Your class needs to implement `RunOpenCode\Backup\Contract\RotatorInterface`. Rotator will get collection of backups on backup
+destination and should only nominate which backups should be removed. 
+                                                     
+## Implementing your own destination
+
+Your class needs to implement `RunOpenCode\Backup\Contract\Destination`. Destination is collection of 
+`RunOpenCode\Backup\Contract\BackupInterface`, while it needs to be noted that physically, for each backup, 
+destination will create a directory and store all backup files within that directory.
+
+When implementing method `push(BackupInterface $backup)` destination should support creating new backups, as well as
+maintaining incremental backups. That means that if backup directory exists on destination, on push, destination should
+sync source files with files that exists in backup directory. To speed up implementation, 
+`RunOpenCode\Backup\Destination\BaseDestination` is at your disposal.
+
+  
 
 
-# Notes on providing EventDispatcher and Logger to the classes within library
-
-
-                                                  
-                                                  
-                                                  
-                                                 
-                                      
 -------------------
 
 

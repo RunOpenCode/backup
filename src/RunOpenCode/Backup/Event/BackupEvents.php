@@ -22,7 +22,7 @@ namespace RunOpenCode\Backup\Event;
 final class BackupEvents
 {
     /**
-     * Dispatched at the begging of the backup process.
+     * Dispatched always at the begging of the backup process.
      */
     const BEGIN = 'run_open_code.backup.begin';
 
