@@ -115,7 +115,7 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
             } elseif (file_exists($this->host)) {
                 $processBuilder
                     ->add('--protocol=socket')
-                    ->add(sprintf('-S %s', $this->host));
+                    ->add(sprintf('--socket=%s', $this->host));
             } else {
                 $processBuilder->add(sprintf('-h%s', $this->host));
             }
