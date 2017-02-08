@@ -57,7 +57,7 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
      */
     protected $port;
 
-    public function __construct($database, $user, $password = null, $host = null, $port = 3306)
+    public function __construct($database, $user, $password = null, $host = null, $port = null)
     {
         $this->database = $database;
         $this->user = $user;
