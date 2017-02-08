@@ -10,10 +10,9 @@
  * This project is fork of "kbond/php-backup", for full credits info, please
  * view CREDITS file that was distributed with this source code.
  */
+namespace RunOpenCode\Backup\Contract;
 
-namespace RunOpenCode\Backup\Exception;
-
-class EmptySourceException extends Exception
+interface ExceptionInterface extends \Throwable
 {
 
 }

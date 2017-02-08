@@ -13,7 +13,7 @@
 
 namespace RunOpenCode\Backup\Exception;
 
-class ProcessorException extends BackupException
+class ProcessorException extends Exception
 {
 
 }

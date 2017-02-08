@@ -12,7 +12,7 @@
  */
 namespace RunOpenCode\Backup\Exception;
 
-class SourceException extends BackupException
+class SourceException extends Exception
 {
 
 }

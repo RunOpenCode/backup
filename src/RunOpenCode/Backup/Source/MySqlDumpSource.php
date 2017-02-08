@@ -108,12 +108,14 @@ class MySqlDumpSource implements SourceInterface, EventDispatcherAwareInterface
             ->add('mysqldump')
             ->add(sprintf('-u%s', $this->user));
 
-        if (!is_null($this->host)) {
+        if (null !== $this->host) {
 
-            if (!is_null($this->port)) {
+            if (null !== $this->port) {
                 $processBuilder->add(sprintf('-h%s:%s', $this->host, $this->port));
+            } elseif (file_exists($this->host)) {
+                $processBuilder->add(sprintf('--protocol=socket -S %s', $this->host));
             } else {
-                $processBuilder->add(sprintf('-h%s', $this->host, $this->port));
+                $processBuilder->add(sprintf('-h%s', $this->host));
             }
         }
 

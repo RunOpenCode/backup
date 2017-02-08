@@ -10,12 +10,11 @@
  * This project is fork of "kbond/php-backup", for full credits info, please
  * view CREDITS file that was distributed with this source code.
  */
-
 namespace RunOpenCode\Backup\Backup;
 
 use RunOpenCode\Backup\Contract\FileInterface;
 use RunOpenCode\Backup\Contract\BackupInterface;
-use RunOpenCode\Backup\Exception\BackupException;
+use RunOpenCode\Backup\Exception\Exception;
 use RunOpenCode\Backup\Utils\Filename;
 
 /**
@@ -152,11 +151,11 @@ final class Backup implements BackupInterface
      */
     public function setCreatedAt($createdAt)
     {
-        if (!is_integer($createdAt) && !$createdAt instanceof \DateTime) {
-            throw new \InvalidArgumentException(sprintf('Integer or \DateTime expected, got: "%s".', BackupException::typeOf($createdAt)));
+        if (!is_int($createdAt) && !$createdAt instanceof \DateTime) {
+            throw new \InvalidArgumentException(sprintf('Integer or \DateTime expected, got: "%s".', Exception::typeOf($createdAt)));
         }
 
-        $this->createdAt = is_integer($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt;
+        $this->createdAt = is_int($createdAt) ? date_timestamp_set(new \DateTime(), $createdAt) : $createdAt;
         return $this;
     }
 
@@ -173,11 +172,11 @@ final class Backup implements BackupInterface
      */
     public function setModifiedAt($modifiedAt)
     {
-        if (!is_integer($modifiedAt) && !$modifiedAt instanceof \DateTime) {
-            throw new \InvalidArgumentException(sprintf('Integer or \DateTime expected, got: "%s".', BackupException::typeOf($modifiedAt)));
+        if (!is_int($modifiedAt) && !$modifiedAt instanceof \DateTime) {
+            throw new \InvalidArgumentException(sprintf('Integer or \DateTime expected, got: "%s".', Exception::typeOf($modifiedAt)));
         }
 
-        $this->modifiedAt = is_integer($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt;
+        $this->modifiedAt = is_int($modifiedAt) ? date_timestamp_set(new \DateTime(), $modifiedAt) : $modifiedAt;
         return $this;
     }
 }

@@ -54,7 +54,7 @@ class Workflow implements WorkflowInterface
      */
     public function execute(ProfileInterface $profile)
     {
-        if (empty($this->eventDispatcher) || empty($this->logger)) {
+        if (null === $this->eventDispatcher || null === $this->logger) {
             throw new \LogicException('Workflow can not be executed without provided Logger and EventDispatcher.');
         }
 
