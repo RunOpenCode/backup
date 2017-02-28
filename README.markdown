@@ -1,5 +1,9 @@
-Simple web application backup library
+[DEPRECIATED] Simple web application backup library
 ======
+
+**This library is depreciated, please use [https://phpbu.de](https://phpbu.de)**
+
+------------------------------------
 
 [![Packagist](https://img.shields.io/packagist/v/RunOpenCode/backup.svg)](https://packagist.org/packages/runopencode/backup)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/RunOpenCode/backup/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/RunOpenCode/backup/?branch=master)
